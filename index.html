@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDI Performance Dashboard</title>
+    <!-- Bootstrap CSS for styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Libraries for PPT and Excel Export -->
+    <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    
+    <style>
+        body { background-color: #f4f6f9; padding: 20px; }
+        .card { margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .section-title { background-color: #007bff; color: white; padding: 10px; border-radius: 5px 5px 0 0; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 class="text-center mb-4">PDI Performance Dashboard</h2>
+
+    <form id="pdiForm" name="submit-to-google-sheet">
+        
+        <!-- 1. General Information -->
+        <div class="card">
+            <div class="section-title"><h5>General Info</h5></div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3"><label>Date</label><input type="date" name="Date" class="form-control" required></div>
+                    <div class="col-md-3"><label>Model</label><input type="text" name="Model" class="form-control" required></div>
+                    <div class="col-md-3"><label>Colour</label><input type="text" name="Colour" class="form-control" required></div>
+                    <div class="col-md-3"><label>Lot Qty</label><input type="number" name="Lot Qty" class="form-control"></div>
+                    <div class="col-md-3"><label>Sample Qty</label><input type="number" name="Sample Qty" class="form-control"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Defect Details -->
+        <div class="card">
+            <div class="section-title"><h5>Defect Information</h5></div>
+            <div class="card-body">
+                <!-- Function -->
+                <div class="row g-3 mb-2 border-bottom pb-2">
+                    <div class="col-md-2"><strong>Function</strong></div>
+                    <div class="col-md-7"><input type="text" name="Func Defect Details" id="funcDetail" class="form-control" placeholder="Defect Details"></div>
+                    <div class="col-md-3"><input type="number" name="Func Qty" id="funcQty" class="form-control" placeholder="Qty" oninput="checkPriority()"></div>
+                </div>
+                <!-- Aesthetics -->
+                <div class="row g-3 mb-2 border-bottom pb-2">
+                    <div class="col-md-2"><strong>Aesthetics</strong></div>
+                    <div class="col-md-7"><input type="text" name="Aes Defect Details" id="aesDetail" class="form-control" placeholder="Defect Details"></div>
+                    <div class="col-md-3"><input type="number" name="Aes Qty" id="aesQty" class="form-control" placeholder="Qty" oninput="checkPriority()"></div>
+                </div>
+                <!-- Packing -->
+                <div class="row g-3">
+                    <div class="col-md-2"><strong>Packing</strong></div>
+                    <div class="col-md-7"><input type="text" name="Pack Defect Details" id="packDetail" class="form-control" placeholder="Defect Details"></div>
+                    <div class="col-md-3"><input type="number" name="Pack Qty" id="packQty" class="form-control" placeholder="Qty" oninput="checkPriority()"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Process Details -->
+        <div class="card">
+            <div class="section-title"><h5>Process & Operator Details</h5></div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6"><label>Master Carton Date & Time</label><input type="datetime-local" name="Master Carton Date" class="form-control"></div>
+                    <div class="col-md-3"><label>LQC Date & Time</label><input type="datetime-local" name="LQC Date" class="form-control"></div>
+                    <div class="col-md-3"><label>LQC Operator Name</label><input type="text" name="LQC Name" class="form-control"></div>
+                    <div class="col-md-3"><label>FT Date & Time</label><input type="datetime-local" name="FT Date" class="form-control"></div>
+                    <div class="col-md-3"><label>FT Operator Name</label><input type="text" name="FT Name" class="form-control"></div>
+                </div>
+                <div class="row g-3 mt-2">
+                    <div class="col-md-4">
+                        <label>Defect Belongs To</label>
+                        <select name="Defect Belongs To" class="form-select">
+                            <option value="Buds">Buds</option>
+                            <option value="Charging">Charging Case</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label>BT Attempt</label>
+                        <select name="BT Attempt" class="form-select">
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label>RF Attempt</label>
+                        <select name="RF Attempt" class="form-select">
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Major Defect Action Plan (Logic based) -->
+        <div class="card border-danger">
+            <div class="section-title bg-danger"><h5>Major Defect Action Plan</h5></div>
+            <div class="card-body">
+                <p class="text-muted small">Problem Description is auto-selected based on priority: Function > Aesthetic > Packing.</p>
+                
+                <div class="mb-3">
+                    <label>1. Team Formation</label>
+                    <input type="text" name="Team Formation" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label>2. Problem Description (Auto-Filled)</label>
+                    <textarea name="Problem Desc" id="problemDesc" class="form-control" readonly></textarea>
+                </div>
+                <div class="mb-3">
+                    <label>3. Root Cause Analysis</label>
+                    <textarea name="Root Cause" class="form-control"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label>4. Corrective Action</label>
+                    <textarea name="Corrective Action" class="form-control"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label>5. Preventive Action</label>
+                    <textarea name="Preventive Action" class="form-control"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="d-flex justify-content-between mb-5">
+            <button type="button" class="btn btn-warning" onclick="previewData()">Preview Data</button>
+            <div>
+                <button type="button" class="btn btn-success" onclick="downloadExcel()">Download Excel</button>
+                <button type="button" class="btn btn-primary" onclick="downloadPPT()">Download PPT</button>
+                <button type="submit" class="btn btn-dark" id="submitBtn">Save to Google Sheet</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Preview Data</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="previewContent">
+        <!-- Content inserted via JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    // --- 1. Logic for Auto-filling Action Plan ---
+    function checkPriority() {
+        const funcQty = document.getElementById('funcQty').value;
+        const aesQty = document.getElementById('aesQty').value;
+        const packQty = document.getElementById('packQty').value;
+        
+        const funcDetail = document.getElementById('funcDetail').value;
+        const aesDetail = document.getElementById('aesDetail').value;
+        const packDetail = document.getElementById('packDetail').value;
+
+        let problem = "No Major Defect";
+
+        // Logic: Function > Aesthetic > Packing
+        if (funcQty && funcQty > 0) {
+            problem = "FUNCTION DEFECT: " + funcDetail + " (Qty: " + funcQty + ")";
+        } else if (aesQty && aesQty > 0) {
+            problem = "AESTHETIC DEFECT: " + aesDetail + " (Qty: " + aesQty + ")";
+        } else if (packQty && packQty > 0) {
+            problem = "PACKING DEFECT: " + packDetail + " (Qty: " + packQty + ")";
+        }
+
+        document.getElementById('problemDesc').value = problem;
+    }
+
+    // --- 2. Google Sheet Submission ---
+    // PASTE YOUR WEB APP URL INSIDE THE QUOTES BELOW
+    const scriptURL = 'YOUR_GOOGLE_SCRIPT_URL_HERE'; 
+    
+    const form = document.forms['submit-to-google-sheet'];
+
+    form.addEventListener('submit', e => {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerText = "Saving...";
+
+        fetch(scriptURL, { method: 'POST', body: new FormData(form)})
+        .then(response => {
+            alert("Data Saved Successfully!");
+            form.reset();
+            btn.disabled = false;
+            btn.innerText = "Save to Google Sheet";
+        })
+        .catch(error => {
+            console.error('Error!', error.message);
+            alert("Error saving data. Check console.");
+            btn.disabled = false;
+        });
+    });
+
+    // --- 3. Preview Logic ---
+    function previewData() {
+        const formData = new FormData(form);
+        let html = "<table class='table table-bordered'>";
+        for (const [key, value] of formData) {
+            if(value) html += `<tr><th>${key}</th><td>${value}</td></tr>`;
+        }
+        html += "</table>";
+        document.getElementById('previewContent').innerHTML = html;
+        new bootstrap.Modal(document.getElementById('previewModal')).show();
+    }
+
+    // --- 4. Excel Download ---
+    function downloadExcel() {
+        const formData = new FormData(form);
+        const data = {};
+        formData.forEach((value, key) => { data[key] = value });
+        
+        const ws = XLSX.utils.json_to_sheet([data]);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "PDI Data");
+        XLSX.writeFile(wb, "PDI_Report.xlsx");
+    }
+
+    // --- 5. PPT Download ---
+    function downloadPPT() {
+        let pres = new PptxGenJS();
+        
+        // Slide 1: Title & General Info
+        let slide1 = pres.addSlide();
+        slide1.addText("PDI Performance Report", { x: 1, y: 0.5, fontSize: 24, bold: true, color: '363636' });
+        
+        const model = document.querySelector('[name="Model"]').value;
+        const date = document.querySelector('[name="Date"]').value;
+        const problem = document.getElementById('problemDesc').value;
+        const rca = document.querySelector('[name="Root Cause"]').value;
+        const capa = document.querySelector('[name="Corrective Action"]').value;
+
+        // Add Data to Slide
+        slide1.addText(`Date: ${date}`, { x: 0.5, y: 1.5, fontSize: 14 });
+        slide1.addText(`Model: ${model}`, { x: 4, y: 1.5, fontSize: 14 });
+        
+        slide1.addText("Problem Description:", { x: 0.5, y: 2.5, fontSize: 16, bold: true, color:'007bff' });
+        slide1.addText(problem, { x: 0.5, y: 3.0, w: 8, fontSize: 12 });
+
+        slide1.addText("Root Cause Analysis:", { x: 0.5, y: 4.0, fontSize: 16, bold: true, color:'007bff' });
+        slide1.addText(rca || "N/A", { x: 0.5, y: 4.5, w: 8, fontSize: 12 });
+
+        slide1.addText("Corrective Action:", { x: 0.5, y: 5.5, fontSize: 16, bold: true, color:'007bff' });
+        slide1.addText(capa || "N/A", { x: 0.5, y: 6.0, w: 8, fontSize: 12 });
+
+        pres.writeFile({ fileName: `PDI_Report_${model}.pptx` });
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
