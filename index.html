@@ -10,449 +10,470 @@
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     
     <style>
-        :root { --primary: #0d6efd; --light-bg: #f0f2f5; --card-bg: #ffffff; }
-        body { background-color: var(--light-bg); font-family: 'Segoe UI', sans-serif; }
+        :root { --primary: #002d72; --accent: #e31837; --bg: #f4f7f6; }
+        body { background-color: var(--bg); font-family: 'Segoe UI', sans-serif; }
         
-        /* Glassy Header */
-        .navbar { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid #e0e0e0; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .logo-img { height: 50px; }
+        /* Branding */
+        .brand-text { font-weight: 800; font-size: 1.5rem; letter-spacing: 1px; color: var(--primary); }
+        .brand-accent { color: var(--accent); }
+        .navbar { background: #fff; border-bottom: 3px solid var(--accent); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
 
-        /* Modern Cards */
-        .card { border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); margin-bottom: 20px; background: var(--card-bg); }
-        .section-title { font-size: 0.9rem; font-weight: 700; color: #6c757d; text-transform: uppercase; letter-spacing: 1px; padding: 15px 20px; border-bottom: 1px solid #f0f0f0; }
-        
-        /* Inputs */
-        .form-control, .form-select { border-radius: 8px; border: 1px solid #dee2e6; background-color: #f8f9fa; }
-        .form-control:focus { background-color: #fff; box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15); }
-        .auto-calc { background-color: #e8f4fd; color: #0d6efd; font-weight: 600; border: 1px solid #b6d4fe; }
+        /* Cards */
+        .card { border: none; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); margin-bottom: 15px; }
+        .card-header { background: white; border-bottom: 1px solid #eee; font-weight: 700; color: #555; }
+        .form-label { font-size: 0.85rem; font-weight: 600; color: #666; margin-bottom: 2px; }
+        .form-control, .form-select { font-size: 0.9rem; border-color: #ddd; }
+        .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 0.2rem rgba(0, 45, 114, 0.1); }
+
+        /* Evidence */
+        .img-thumb { height: 60px; width: 60px; object-fit: cover; border: 1px solid #ddd; margin: 2px; border-radius: 4px; }
 
         /* Dashboard Table */
-        .table-custom th { background-color: #eef2f7; color: #555; font-weight: 600; }
-        .table-custom td { vertical-align: middle; }
-        
-        /* Evidence Preview */
-        #evidencePreviewImg { max-height: 150px; border-radius: 8px; border: 2px dashed #ccc; display: none; margin-top: 10px; }
+        .table thead { background-color: var(--primary); color: white; font-size: 0.9rem; }
+        .btn-action { padding: 2px 8px; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
-<!-- Navigation -->
+<!-- Navbar -->
 <nav class="navbar fixed-top">
-    <div class="container">
-        <div class="d-flex align-items-center gap-3">
-            <img src="logo.png" id="navLogo" class="logo-img" alt="Logo" onerror="this.style.display='none'">
-            <div>
-                <h5 class="m-0 fw-bold text-dark">Califonix PDI Tool</h5>
-                <small class="text-muted">Quality Assurance Dashboard</small>
-            </div>
+    <div class="container-fluid px-4">
+        <div class="d-flex align-items-center gap-2">
+            <!-- CSS Logo to fix "Image not loading" issue -->
+            <div class="brand-text">CALIF<span class="brand-accent">ONIX</span></div>
         </div>
-        <ul class="nav nav-pills" id="pills-tab" role="tablist">
-            <li class="nav-item"><button class="nav-link active rounded-pill" id="tab-form" data-bs-toggle="pill" data-bs-target="#pills-home" type="button">New Inspection</button></li>
-            <li class="nav-item"><button class="nav-link rounded-pill" id="tab-dash" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" onclick="loadDashboard()">Live Dashboard</button></li>
+        <ul class="nav nav-pills" role="tablist">
+            <li class="nav-item"><button class="nav-link active" id="tab-form" data-bs-toggle="pill" data-bs-target="#pills-form">New Entry</button></li>
+            <li class="nav-item"><button class="nav-link" id="tab-dash" data-bs-toggle="pill" data-bs-target="#pills-dash" onclick="loadDashboard()">Live Dashboard</button></li>
         </ul>
     </div>
 </nav>
 
-<div class="container" style="margin-top: 100px; padding-bottom: 50px;">
-    <div class="tab-content" id="pills-tabContent">
+<div class="container" style="margin-top: 80px; padding-bottom: 50px;">
+    <div class="tab-content">
         
-        <!-- === TAB 1: NEW ENTRY FORM === -->
-        <div class="tab-pane fade show active" id="pills-home">
+        <!-- === FORM TAB === -->
+        <div class="tab-pane fade show active" id="pills-form">
             <form id="pdiForm">
-                
-                <!-- General Info -->
+                <input type="hidden" name="action" id="formAction" value="save">
+                <input type="hidden" name="editRowId" id="editRowId">
+
+                <!-- 1. General Info -->
                 <div class="card">
-                    <div class="section-title text-primary"><i class="bi bi-grid-fill me-2"></i>General Info</div>
+                    <div class="card-header text-primary"><i class="bi bi-info-circle-fill me-2"></i>General Information</div>
                     <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-2"><label>Date</label><input type="date" name="Date" class="form-control" required></div>
-                            <div class="col-md-3"><label>Model</label><input type="text" name="Model" class="form-control" placeholder="e.g. Earbuds" required></div>
-                            <div class="col-md-2"><label>Colour</label><input type="text" name="Colour" class="form-control" required></div>
-                            <div class="col-md-2"><label>Line No</label><input type="text" name="Line No" class="form-control" required></div>
-                            <div class="col-md-3"><label>Lot Qty</label><input type="number" name="Lot Qty" class="form-control"></div>
-                            
-                            <div class="col-md-2"><label>Sample Qty</label><input type="number" name="Sample Qty" id="sampleQty" class="form-control" oninput="calc()"></div>
-                            <div class="col-md-2"><label>Total Defect</label><input type="text" name="Total Defect Qty" id="totalDefect" class="form-control auto-calc" readonly></div>
-                            <div class="col-md-2"><label>SRR %</label><input type="text" name="SRR %" id="srrRate" class="form-control auto-calc" readonly></div>
+                        <div class="row g-2">
+                            <div class="col-md-2"><label class="form-label">Date</label><input type="date" name="Date" class="form-control" required></div>
+                            <div class="col-md-2"><label class="form-label">Model</label><input type="text" name="Model" class="form-control" required></div>
+                            <div class="col-md-2"><label class="form-label">Line No</label><input type="text" name="Line No" class="form-control" required></div>
+                            <div class="col-md-2"><label class="form-label">Colour</label><input type="text" name="Colour" class="form-control"></div>
+                            <div class="col-md-2"><label class="form-label">Lot Qty</label><input type="number" name="Lot Qty" class="form-control"></div>
+                            <div class="col-md-2"><label class="form-label">Sample Qty</label><input type="number" name="Sample Qty" id="sampleQty" class="form-control" oninput="calc()"></div>
+                        </div>
+                        <div class="row g-2 mt-1 bg-light p-2 rounded">
+                            <div class="col-md-2"><label class="form-label text-danger">Total Defects</label><input type="text" name="Total Defect" id="totalDefect" class="form-control fw-bold text-danger" readonly></div>
+                            <div class="col-md-2"><label class="form-label text-danger">SRR %</label><input type="text" name="SRR" id="srrRate" class="form-control fw-bold text-danger" readonly></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Defects -->
+                <!-- 2. Defects -->
                 <div class="card">
-                    <div class="section-title text-danger"><i class="bi bi-bug-fill me-2"></i>Defect Details</div>
+                    <div class="card-header text-danger"><i class="bi bi-bug-fill me-2"></i>Defect Breakdown</div>
+                    <div class="card-body p-2">
+                        <table class="table table-borderless m-0">
+                            <tr>
+                                <td width="15%" class="fw-bold">Function</td>
+                                <td><input type="text" name="Func Details" id="fDet" class="form-control form-control-sm" placeholder="Detail..."></td>
+                                <td width="10%"><input type="number" name="Func Qty" id="fQty" class="form-control form-control-sm" placeholder="Qty" oninput="calc()"></td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Aesthetic</td>
+                                <td><input type="text" name="Aes Details" id="aDet" class="form-control form-control-sm" placeholder="Detail..."></td>
+                                <td><input type="number" name="Aes Qty" id="aQty" class="form-control form-control-sm" placeholder="Qty" oninput="calc()"></td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Packing</td>
+                                <td><input type="text" name="Pack Details" id="pDet" class="form-control form-control-sm" placeholder="Detail..."></td>
+                                <td><input type="number" name="Pack Qty" id="pQty" class="form-control form-control-sm" placeholder="Qty" oninput="calc()"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 3. Process Traceability -->
+                <div class="card">
+                    <div class="card-header text-success"><i class="bi bi-clock-history me-2"></i>Traceability</div>
                     <div class="card-body">
-                        <div class="row g-2 align-items-center mb-2">
-                            <div class="col-2 fw-bold text-danger">Function</div>
-                            <div class="col-8"><input type="text" name="Func Defect Details" id="fDet" class="form-control" placeholder="Issue description..."></div>
-                            <div class="col-2"><input type="number" name="Func Qty" id="fQty" class="form-control" placeholder="0" oninput="calc()"></div>
-                        </div>
-                        <div class="row g-2 align-items-center mb-2">
-                            <div class="col-2 fw-bold text-warning">Aesthetic</div>
-                            <div class="col-8"><input type="text" name="Aes Defect Details" id="aDet" class="form-control" placeholder="Issue description..."></div>
-                            <div class="col-2"><input type="number" name="Aes Qty" id="aQty" class="form-control" placeholder="0" oninput="calc()"></div>
-                        </div>
-                        <div class="row g-2 align-items-center">
-                            <div class="col-2 fw-bold text-info">Packing</div>
-                            <div class="col-8"><input type="text" name="Pack Defect Details" id="pDet" class="form-control" placeholder="Issue description..."></div>
-                            <div class="col-2"><input type="number" name="Pack Qty" id="pQty" class="form-control" placeholder="0" oninput="calc()"></div>
+                        <div class="row g-2">
+                            <div class="col-md-3"><label class="form-label">Master Carton</label><input type="datetime-local" name="MC Date" class="form-control"></div>
+                            <div class="col-md-3"><label class="form-label">LQC Date</label><input type="datetime-local" name="LQC Date" class="form-control"></div>
+                            <div class="col-md-3"><label class="form-label">LQC Name</label><input type="text" name="LQC Name" class="form-control"></div>
+                            <div class="col-md-3"><label class="form-label">Belongs To</label><select name="Belongs To" class="form-select"><option>Buds</option><option>Case</option></select></div>
+                            <div class="col-md-3"><label class="form-label">FT Date</label><input type="datetime-local" name="FT Date" class="form-control"></div>
+                            <div class="col-md-3"><label class="form-label">FT Name</label><input type="text" name="FT Name" class="form-control"></div>
+                            <div class="col-md-3"><label class="form-label">BT Attempt</label><select name="BT Attempt" class="form-select"><option>Yes</option><option>No</option></select></div>
+                            <div class="col-md-3"><label class="form-label">RF Attempt</label><select name="RF Attempt" class="form-select"><option>Yes</option><option>No</option></select></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Process -->
-                <div class="card">
-                    <div class="section-title text-success"><i class="bi bi-clipboard-check-fill me-2"></i>Traceability</div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-4"><label>Master Carton Date</label><input type="datetime-local" name="Master Carton Date" class="form-control"></div>
-                            <div class="col-md-4"><label>LQC (Date/Name)</label><div class="input-group"><input type="datetime-local" name="LQC Date" class="form-control"><input type="text" name="LQC Name" class="form-control" placeholder="Name"></div></div>
-                            <div class="col-md-4"><label>FT (Date/Name)</label><div class="input-group"><input type="datetime-local" name="FT Date" class="form-control"><input type="text" name="FT Name" class="form-control" placeholder="Name"></div></div>
-                            <div class="col-md-4"><label>Defect Belongs To</label><select name="Defect Belongs To" class="form-select"><option>Buds</option><option>Case</option><option>Accessory</option></select></div>
-                            <div class="col-md-4"><label>BT Attempt</label><select name="BT Attempt" class="form-select"><option>Yes</option><option>No</option></select></div>
-                            <div class="col-md-4"><label>RF Attempt</label><select name="RF Attempt" class="form-select"><option>Yes</option><option>No</option></select></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Action Plan & Evidence -->
-                <div class="card border-0 shadow-sm" style="background: #fff5f5;">
-                    <div class="section-title text-danger"><i class="bi bi-shield-exclamation me-2"></i>Action Plan & Evidence</div>
+                <!-- 4. CAPA & Evidence -->
+                <div class="card border-danger">
+                    <div class="card-header bg-danger text-white">Action Plan</div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-8">
-                                <label class="fw-bold">Team Formation</label>
-                                <input type="text" name="Team Formation" class="form-control mb-2">
-                                
-                                <label class="fw-bold text-danger">Problem Description (Auto)</label>
-                                <input type="text" name="Problem Desc" id="problemDesc" class="form-control mb-2 fw-bold bg-white" readonly>
-
-                                <label class="fw-bold">Root Cause</label>
-                                <textarea name="Root Cause" class="form-control mb-2" rows="2"></textarea>
-                                
-                                <label class="fw-bold">Corrective Action</label>
-                                <textarea name="Corrective Action" class="form-control mb-2" rows="2"></textarea>
-                                
-                                <label class="fw-bold">Preventive Action</label>
-                                <textarea name="Preventive Action" class="form-control" rows="2"></textarea>
+                                <label class="form-label">Team Formation</label><input type="text" name="Team" class="form-control mb-2">
+                                <label class="form-label fw-bold">Problem (Auto)</label><input type="text" name="Problem" id="problemDesc" class="form-control mb-2 bg-light fw-bold" readonly>
+                                <label class="form-label">Root Cause</label><textarea name="Root Cause" class="form-control mb-2" rows="1"></textarea>
+                                <label class="form-label">Corrective Action</label><textarea name="Corrective" class="form-control mb-2" rows="1"></textarea>
+                                <label class="form-label">Preventive Action</label><textarea name="Preventive" class="form-control" rows="1"></textarea>
                             </div>
-                            <div class="col-md-4 text-center border-start">
-                                <label class="fw-bold mb-2">Upload Evidence (Photo)</label>
-                                <input type="file" id="evidenceInput" class="form-control" accept="image/*" onchange="handleEvidence()">
-                                <small class="text-muted d-block mt-1">Shows in Preview & PPT only.</small>
-                                <img id="evidencePreviewImg" alt="Evidence">
+                            <div class="col-md-4 border-start text-center">
+                                <label class="form-label fw-bold d-block">Upload Evidence (Multiple)</label>
+                                <input type="file" id="evidenceInput" class="form-control mb-2" accept="image/*" multiple onchange="handleEvidence()">
+                                <div id="evidencePreviewBox" class="d-flex flex-wrap justify-content-center gap-1"></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Buttons -->
-                <div class="d-flex justify-content-end gap-3 mt-4">
-                    <button type="button" class="btn btn-outline-dark px-4" onclick="previewData()"><i class="bi bi-eye"></i> Preview</button>
-                    <button type="submit" class="btn btn-primary px-4" id="submitBtn"><i class="bi bi-cloud-upload"></i> Save Data</button>
+                <div class="d-flex justify-content-end gap-2 my-4">
+                    <button type="button" class="btn btn-warning" onclick="resetForm()">Clear</button>
+                    <button type="button" class="btn btn-info text-white" onclick="showFullPreview()">Preview Full Report</button>
+                    <button type="submit" class="btn btn-success px-4" id="saveBtn">Save Record</button>
                 </div>
             </form>
         </div>
 
-        <!-- === TAB 2: DASHBOARD === -->
-        <div class="tab-pane fade" id="pills-profile">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="text-dark">Saved Inspections</h4>
-                <button class="btn btn-sm btn-outline-primary" onclick="loadDashboard()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
-            </div>
-            <div class="table-responsive bg-white rounded shadow-sm p-3">
-                <table class="table table-hover table-custom" id="dashTable">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Model</th>
-                            <th>Line</th>
-                            <th>Defect</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="dashBody">
-                        <tr><td colspan="5" class="text-center p-4">Loading data...</td></tr>
-                    </tbody>
-                </table>
+        <!-- === DASHBOARD TAB === -->
+        <div class="tab-pane fade" id="pills-dash">
+            <div class="card p-3">
+                <div class="row g-2 align-items-end mb-3">
+                    <div class="col-md-3"><label class="form-label">From Date</label><input type="date" id="filterStart" class="form-control"></div>
+                    <div class="col-md-3"><label class="form-label">To Date</label><input type="date" id="filterEnd" class="form-control"></div>
+                    <div class="col-md-3"><button class="btn btn-primary w-100" onclick="loadDashboard()">Apply Filter</button></div>
+                    <div class="col-md-3"><button class="btn btn-outline-secondary w-100" onclick="loadDashboard()">Show All</button></div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered text-center align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Date</th><th>Model</th><th>Line</th><th>Total Defect</th><th>Action Plan</th><th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashData"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
     </div>
 </div>
 
-<!-- Preview Modal -->
+<!-- Full Preview Modal -->
 <div class="modal fade" id="previewModal" tabindex="-1">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Report Preview</h5>
+                <h5 class="modal-title">Inspection Report Preview</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body bg-light" id="previewBody">
-                <!-- Injected via JS -->
-            </div>
+            <div class="modal-body bg-white" id="previewContent"></div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger" onclick="downloadPPT()"><i class="bi bi-file-ppt"></i> Download PPT</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" onclick="downloadPPT()"><i class="bi bi-file-ppt-fill"></i> Download Professional PPT</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // === CONFIGURATION ===
-    // PASTE YOUR NEW GOOGLE SCRIPT URL HERE
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbx7xNZ5JeWU6QN9IM8WzyTNycDDYWXv3Ej_XJVkIhURkzGxFYH6uCju4_hiWq5gE2ZC/exec'; 
+    // URL REPLACE KAREIN
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_s1aGTlzKo__fW9j4lrqeyXwKJjmQjXVQKj0CIVdOK_940lsaMXYbSXdgaOrduhEX/exec'; 
+    
+    let evidenceImages = []; // Stores Base64 strings
 
-    let logoBase64 = null;
-    let evidenceBase64 = null;
-
-    // 1. Auto Load Logo
-    window.onload = function() {
-        fetch('logo.png')
-            .then(r => r.blob())
-            .then(b => {
-                const reader = new FileReader();
-                reader.onloadend = () => { logoBase64 = reader.result; };
-                reader.readAsDataURL(b);
-            })
-            .catch(e => console.log("Logo file not found in repo"));
-    };
-
-    // 2. Handle Evidence Image
+    // 1. Evidence Handling (Multiple)
     function handleEvidence() {
-        const file = document.getElementById('evidenceInput').files[0];
-        if (file) {
+        const files = document.getElementById('evidenceInput').files;
+        const previewBox = document.getElementById('evidencePreviewBox');
+        previewBox.innerHTML = '';
+        evidenceImages = [];
+
+        Array.from(files).forEach(file => {
             const reader = new FileReader();
-            reader.onload = function(e) {
-                evidenceBase64 = e.target.result;
-                const img = document.getElementById('evidencePreviewImg');
-                img.src = evidenceBase64;
-                img.style.display = 'block';
+            reader.onload = e => {
+                evidenceImages.push(e.target.result);
+                previewBox.innerHTML += `<img src="${e.target.result}" class="img-thumb">`;
             };
             reader.readAsDataURL(file);
-        }
+        });
     }
 
-    // 3. Calculation Logic
+    // 2. Calculation & Problem Auto-Fill
     function calc() {
-        const f = Number(document.getElementById('fQty').value);
-        const a = Number(document.getElementById('aQty').value);
-        const p = Number(document.getElementById('pQty').value);
-        const s = Number(document.getElementById('sampleQty').value);
-
+        const f = Number(document.getElementById('fQty').value) || 0;
+        const a = Number(document.getElementById('aQty').value) || 0;
+        const p = Number(document.getElementById('pQty').value) || 0;
+        const sample = Number(document.getElementById('sampleQty').value) || 0;
+        
         const total = f + a + p;
         document.getElementById('totalDefect').value = total;
-        document.getElementById('srrRate').value = s > 0 ? ((total/s)*100).toFixed(2) + '%' : '0%';
+        document.getElementById('srrRate').value = sample > 0 ? ((total/sample)*100).toFixed(2) + '%' : '0%';
 
-        // Problem Description
-        let desc = "No Major Issues";
-        if(f > 0) desc = `Function: ${document.getElementById('fDet').value} (${f} pcs)`;
-        else if(a > 0) desc = `Aesthetic: ${document.getElementById('aDet').value} (${a} pcs)`;
-        else if(p > 0) desc = `Packing: ${document.getElementById('pDet').value} (${p} pcs)`;
-        document.getElementById('problemDesc').value = desc;
+        let prob = "No Major Issues";
+        if (f > 0) prob = `Function: ${document.getElementById('fDet').value} (${f})`;
+        else if (a > 0) prob = `Aesthetic: ${document.getElementById('aDet').value} (${a})`;
+        else if (p > 0) prob = `Packing: ${document.getElementById('pDet').value} (${p})`;
+        document.getElementById('problemDesc').value = prob;
     }
 
-    // 4. Save Data
+    // 3. Save / Update Logic
     const form = document.getElementById('pdiForm');
     form.addEventListener('submit', e => {
         e.preventDefault();
-        const btn = document.getElementById('submitBtn');
-        btn.innerHTML = 'Saving...'; btn.disabled = true;
+        const btn = document.getElementById('saveBtn');
+        btn.innerText = "Saving..."; btn.disabled = true;
 
-        fetch(scriptURL, { method: 'POST', body: new FormData(form)})
+        fetch(SCRIPT_URL, { method: 'POST', body: new FormData(form) })
         .then(res => res.json())
         .then(data => {
-            if(data.result === 'success') {
-                alert("Saved Successfully!");
-                form.reset();
-                document.getElementById('evidencePreviewImg').style.display='none';
-                evidenceBase64 = null;
-            } else {
-                alert("Error: " + JSON.stringify(data));
-            }
-            btn.innerHTML = '<i class="bi bi-cloud-upload"></i> Save Data'; btn.disabled = false;
+            alert(data.message);
+            resetForm();
+            btn.innerText = "Save Record"; btn.disabled = false;
         })
-        .catch(err => {
-            alert("Connection Error. Check Script URL.");
-            btn.disabled = false;
-        });
+        .catch(err => { alert("Error saving data"); btn.disabled = false; });
     });
 
-    // 5. Dashboard Logic (Load & Delete)
-    function loadDashboard() {
-        const tbody = document.getElementById('dashBody');
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center">Fetching Data...</td></tr>';
+    function resetForm() {
+        form.reset();
+        document.getElementById('formAction').value = 'save';
+        document.getElementById('editRowId').value = '';
+        document.getElementById('saveBtn').innerText = "Save Record";
+        document.getElementById('saveBtn').classList.remove('btn-warning');
+        document.getElementById('saveBtn').classList.add('btn-success');
+        document.getElementById('evidencePreviewBox').innerHTML = '';
+        evidenceImages = [];
+    }
 
-        fetch(scriptURL)
+    // 4. Dashboard (Filter, Load, Edit, Delete)
+    function loadDashboard() {
+        const tbody = document.getElementById('dashData');
+        tbody.innerHTML = '<tr><td colspan="6">Loading...</td></tr>';
+        
+        const start = document.getElementById('filterStart').value;
+        const end = document.getElementById('filterEnd').value;
+
+        fetch(SCRIPT_URL)
         .then(res => res.json())
-        .then(data => {
-            if(data.result === 'success') {
-                let rows = '';
-                // data.data is an array of arrays
-                // Index 0=RowIndex, 1=Date, 2=Model, 3=Color, 4=Line, ...
-                data.data.forEach(row => {
-                    // Create Date formatted
-                    let d = new Date(row[1]).toLocaleDateString();
-                    rows += `
-                        <tr>
-                            <td>${d}</td>
-                            <td>${row[2]}</td>
-                            <td>${row[4]}</td>
-                            <td>${row[24] || 'None'}</td>
-                            <td>
-                                <button class="btn btn-sm btn-danger" onclick="deleteRow(${row[0]})">Delete</button>
-                                <button class="btn btn-sm btn-success" onclick="downloadRowPPT('${encodeURIComponent(JSON.stringify(row))}')">PPT</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-                tbody.innerHTML = rows;
-            }
+        .then(json => {
+            tbody.innerHTML = '';
+            // Data Structure: [RowID, Date, Model, Line, Colour, Lot, Sample, Total, SRR, ...]
+            // Index Mapping: 0=ID, 1=Date, 2=Model, 3=Line, 7=Total, 24=Problem
+            
+            const rows = json.data.filter(row => {
+                if(!start || !end) return true;
+                return row[1] >= start && row[1] <= end;
+            });
+
+            if(rows.length === 0) tbody.innerHTML = '<tr><td colspan="6">No Data Found</td></tr>';
+
+            rows.forEach(row => {
+                let jsonRow = encodeURIComponent(JSON.stringify(row));
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${row[1]}</td>
+                        <td>${row[2]}</td>
+                        <td>${row[3]}</td>
+                        <td><span class="badge bg-danger">${row[7]}</span></td>
+                        <td class="small text-start">${row[24]}</td>
+                        <td>
+                            <button class="btn btn-warning btn-action" onclick="editRecord('${jsonRow}')">Edit</button>
+                            <button class="btn btn-danger btn-action" onclick="deleteRecord(${row[0]})">Del</button>
+                            <button class="btn btn-success btn-action" onclick="pptFromRow('${jsonRow}')">PPT</button>
+                        </td>
+                    </tr>
+                `;
+            });
         });
     }
 
-    function deleteRow(rowIndex) {
-        if(!confirm("Delete this record?")) return;
-        const formData = new FormData();
-        formData.append('action', 'delete');
-        formData.append('rowIndex', rowIndex);
+    function editRecord(rowStr) {
+        const row = JSON.parse(decodeURIComponent(rowStr));
+        // Switch to form
+        document.getElementById('tab-form').click();
+        
+        // Populate fields (Indices based on Google Sheet order)
+        document.getElementById('formAction').value = 'edit';
+        document.getElementById('editRowId').value = row[0];
+        
+        const inputs = form.elements;
+        inputs['Date'].value = row[1];
+        inputs['Model'].value = row[2];
+        inputs['Line No'].value = row[3];
+        inputs['Colour'].value = row[4];
+        inputs['Lot Qty'].value = row[5];
+        inputs['Sample Qty'].value = row[6];
+        inputs['Total Defect'].value = row[7];
+        inputs['SRR'].value = row[8];
+        inputs['Func Details'].value = row[9]; inputs['Func Qty'].value = row[10];
+        inputs['Aes Details'].value = row[11]; inputs['Aes Qty'].value = row[12];
+        inputs['Pack Details'].value = row[13]; inputs['Pack Qty'].value = row[14];
+        inputs['MC Date'].value = row[15];
+        inputs['LQC Date'].value = row[16]; inputs['LQC Name'].value = row[17];
+        inputs['FT Date'].value = row[18]; inputs['FT Name'].value = row[19];
+        inputs['Belongs To'].value = row[20];
+        inputs['BT Attempt'].value = row[21];
+        inputs['RF Attempt'].value = row[22];
+        inputs['Team'].value = row[23];
+        inputs['Problem'].value = row[24];
+        inputs['Root Cause'].value = row[25];
+        inputs['Corrective'].value = row[26];
+        inputs['Preventive'].value = row[27];
 
-        fetch(scriptURL, { method: 'POST', body: formData })
-        .then(res => res.json())
-        .then(() => loadDashboard());
+        const btn = document.getElementById('saveBtn');
+        btn.innerText = "Update Record";
+        btn.classList.remove('btn-success');
+        btn.classList.add('btn-warning');
     }
 
-    // 6. Preview Modal
-    function previewData() {
+    function deleteRecord(id) {
+        if(!confirm("Are you sure?")) return;
+        const fd = new FormData();
+        fd.append('action', 'delete');
+        fd.append('rowIndex', id);
+        fetch(SCRIPT_URL, { method:'POST', body:fd }).then(() => loadDashboard());
+    }
+
+    // 5. Preview Full Details
+    function showFullPreview() {
         const fd = new FormData(form);
-        
         let html = `
-            <div class="container-fluid p-3 border rounded bg-white">
-                <div class="row mb-3 border-bottom pb-2">
-                    <div class="col-2"><img src="${logoBase64 || ''}" style="height:50px"></div>
-                    <div class="col-8 text-center"><h3>${fd.get('Model')} - PDI Report</h3></div>
-                    <div class="col-2 text-end fw-bold">${fd.get('Date')}</div>
+            <div class="border p-4">
+                <div class="d-flex justify-content-between border-bottom pb-2 mb-3">
+                    <h2 class="text-primary fw-bold">CALIF<span class="text-danger">ONIX</span></h2>
+                    <div class="text-end">
+                        <h5>PDI REPORT</h5>
+                        <small>Date: ${fd.get('Date')} | Model: ${fd.get('Model')}</small>
+                    </div>
                 </div>
                 
-                <div class="row mb-3 text-center">
-                    <div class="col-3 border p-2 bg-light"><strong>Lot:</strong> ${fd.get('Lot Qty')}</div>
-                    <div class="col-3 border p-2 bg-light"><strong>Sample:</strong> ${fd.get('Sample Qty')}</div>
-                    <div class="col-3 border p-2 bg-light text-danger"><strong>Defects:</strong> ${fd.get('Total Defect Qty')}</div>
-                    <div class="col-3 border p-2 bg-light text-primary"><strong>SRR:</strong> ${fd.get('SRR %')}</div>
-                </div>
+                <table class="table table-bordered table-sm text-center">
+                    <tr class="table-secondary"><th>Line</th><th>Lot Qty</th><th>Sample</th><th>Defects</th><th>SRR</th></tr>
+                    <tr><td>${fd.get('Line No')}</td><td>${fd.get('Lot Qty')}</td><td>${fd.get('Sample Qty')}</td><td class="text-danger fw-bold">${fd.get('Total Defect')}</td><td>${fd.get('SRR')}</td></tr>
+                </table>
 
-                <div class="row mb-3">
-                    <div class="col-6">
-                        <h5>Defect Details</h5>
-                        <ul>
-                            <li>Func: ${fd.get('Func Defect Details')} (${fd.get('Func Qty')})</li>
-                            <li>Aes: ${fd.get('Aes Defect Details')} (${fd.get('Aes Qty')})</li>
-                            <li>Pack: ${fd.get('Pack Defect Details')} (${fd.get('Pack Qty')})</li>
-                        </ul>
-                    </div>
-                    <div class="col-6">
-                        <h5>Action Plan</h5>
-                        <p><strong>Problem:</strong> ${fd.get('Problem Desc')}</p>
-                        <p><strong>Action:</strong> ${fd.get('Corrective Action')}</p>
-                    </div>
-                </div>
+                <h6 class="text-primary mt-3 border-bottom">Defect Analysis</h6>
+                <table class="table table-sm table-bordered">
+                    <tr><th>Type</th><th>Details</th><th>Qty</th></tr>
+                    <tr><td>Function</td><td>${fd.get('Func Details')}</td><td>${fd.get('Func Qty')}</td></tr>
+                    <tr><td>Aesthetic</td><td>${fd.get('Aes Details')}</td><td>${fd.get('Aes Qty')}</td></tr>
+                    <tr><td>Packing</td><td>${fd.get('Pack Details')}</td><td>${fd.get('Pack Qty')}</td></tr>
+                </table>
 
-                ${evidenceBase64 ? `<div class="text-center mt-3"><h5 class="text-danger">Evidence</h5><img src="${evidenceBase64}" style="max-height:200px; border:1px solid #ddd;"></div>` : ''}
+                <h6 class="text-primary mt-3 border-bottom">Action Plan</h6>
+                <table class="table table-bordered table-sm">
+                    <tr><td width="30%" class="bg-light fw-bold">Problem</td><td>${fd.get('Problem')}</td></tr>
+                    <tr><td class="bg-light fw-bold">Root Cause</td><td>${fd.get('Root Cause')}</td></tr>
+                    <tr><td class="bg-light fw-bold">Corrective Action</td><td>${fd.get('Corrective')}</td></tr>
+                    <tr><td class="bg-light fw-bold">Preventive Action</td><td>${fd.get('Preventive')}</td></tr>
+                </table>
+
+                <h6 class="text-primary mt-3">Evidence</h6>
+                <div class="d-flex gap-2">
+                    ${evidenceImages.map(img => `<img src="${img}" style="height:100px; border:1px solid #ccc">`).join('')}
+                </div>
             </div>
         `;
-        document.getElementById('previewBody').innerHTML = html;
+        document.getElementById('previewContent').innerHTML = html;
         new bootstrap.Modal(document.getElementById('previewModal')).show();
     }
 
-    // 7. Generate Professional PPT (Light Theme)
+    // 6. Professional PPT (Full Details + Images)
     function downloadPPT() {
-        createPPT(new FormData(form), evidenceBase64);
+        // Collect data from Form
+        const fd = new FormData(form);
+        const dataObj = {};
+        fd.forEach((v,k) => dataObj[k] = v);
+        generatePPT(dataObj, evidenceImages);
     }
 
-    // Helper for Dashboard PPT Download
-    function downloadRowPPT(rowString) {
-        const row = JSON.parse(decodeURIComponent(rowString));
-        // Manually map row array to FormData-like object for the PPT function
-        const mockData = {
-            get: (key) => {
-                const map = {
-                    'Date': row[1], 'Model': row[2], 'Line No': row[4],
-                    'Lot Qty': row[5], 'Sample Qty': row[6], 'Total Defect Qty': row[7], 'SRR %': row[8],
-                    'Func Defect Details': row[9], 'Func Qty': row[10],
-                    'Aes Defect Details': row[11], 'Aes Qty': row[12],
-                    'Pack Defect Details': row[13], 'Pack Qty': row[14],
-                    'Master Carton Date': row[15], 'LQC Date': row[16], 'LQC Name': row[17],
-                    'FT Date': row[18], 'FT Name': row[19],
-                    'BT Attempt': row[21], 'RF Attempt': row[22],
-                    'Team Formation': row[23], 'Problem Desc': row[24],
-                    'Root Cause': row[25], 'Corrective Action': row[26], 'Preventive Action': row[27]
-                };
-                return map[key] || '';
-            }
+    function pptFromRow(jsonStr) {
+        const row = JSON.parse(decodeURIComponent(jsonStr));
+        // Map Array to Object keys manually
+        const dataObj = {
+            'Date': row[1], 'Model': row[2], 'Line No': row[3], 'Lot Qty': row[5], 'Sample Qty': row[6],
+            'Total Defect': row[7], 'SRR': row[8],
+            'Func Details': row[9], 'Func Qty': row[10], 'Aes Details': row[11], 'Aes Qty': row[12], 'Pack Details': row[13], 'Pack Qty': row[14],
+            'MC Date': row[15], 'LQC Name': row[17], 'FT Name': row[19],
+            'Problem': row[24], 'Root Cause': row[25], 'Corrective': row[26], 'Preventive': row[27]
         };
-        createPPT(mockData, null); // Evidence logic for dashboard rows is complex, skipping for now
+        // Note: Dashboard doesn't store images in sheet (too heavy), so passing empty array
+        generatePPT(dataObj, []); 
     }
 
-    function createPPT(fd, imgData) {
+    function generatePPT(data, images) {
         let pres = new PptxGenJS();
         
-        // Define Light Theme Master
+        // Master Slide with Califonix Branding
         pres.defineSlideMaster({
-            title: "LIGHT_THEME",
+            title: "CALIFONIX_MASTER",
             background: { color: "FFFFFF" },
             objects: [
-                { rect: { x: 0, y: 0, w: "100%", h: 0.6, fill: "E3F2FD" } }, // Light Blue Header
-                { text: { text: "PDI REPORT", options: { x: 0.2, y: 0.1, color: "1565C0", fontSize: 18, bold: true } } }, // Dark Blue Text
-                { line: { x: 0, y: 0.6, w: "100%", h: 0, line: "1565C0", lineSize: 2 } },
-                { image: { data: logoBase64 || '', x: 9.0, y: 0.05, w: 0.8, h: 0.5 } }
+                { rect: { x: 0, y: 0, w: "100%", h: 0.8, fill: "002d72" } },
+                { text: { text: "CALIFONIX QUALITY REPORT", options: { x: 0.5, y: 0.2, color: "FFFFFF", fontSize: 18, bold: true } } },
+                { line: { x: 0, y: 5.2, w: "100%", h: 0, line: "e31837", lineSize: 3 } } // Bottom Red Line
             ]
         });
 
-        let slide = pres.addSlide({ masterName: "LIGHT_THEME" });
+        let slide = pres.addSlide({ masterName: "CALIFONIX_MASTER" });
 
-        // Title Info
-        slide.addText(`Model: ${fd.get('Model')}  |  Date: ${fd.get('Date')}  |  Line: ${fd.get('Line No')}`, 
-            { x: 0.2, y: 0.8, fontSize: 14, color: "555555", bold: true });
+        // Header Info
+        slide.addText(`Model: ${data['Model']}   |   Date: ${data['Date']}   |   Line: ${data['Line No']}`, 
+            { x: 0.5, y: 1.0, fontSize: 14, color: "444444", bold: true });
 
-        // 1. Metrics Grid (Light Colors)
-        let metrics = [
-            [
-                { text: "Lot Qty", options: { fill: "F1F8E9", color: "2E7D32", bold:true } }, // Light Green
-                { text: "Sample", options: { fill: "FFF3E0", color: "EF6C00", bold:true } }, // Light Orange
-                { text: "Defects", options: { fill: "FFEBEE", color: "C62828", bold:true } }, // Light Red
-                { text: "SRR %", options: { fill: "E3F2FD", color: "1565C0", bold:true } }  // Light Blue
-            ],
-            [ fd.get('Lot Qty'), fd.get('Sample Qty'), fd.get('Total Defect Qty'), fd.get('SRR %') ]
-        ];
-        slide.addTable(metrics, { x: 0.2, y: 1.2, w: 9.6, h: 0.8, align: "center", fontSize: 12, border:{pt:0} });
-
-        // 2. Defect & Process Info
-        slide.addText("Defect Analysis & Traceability", { x: 0.2, y: 2.2, fontSize: 12, color: "1565C0", bold: true });
+        // 1. Metrics Table
+        let headers = [['Lot Qty', 'Sample Qty', 'Total Defect', 'SRR %']];
+        let values = [[data['Lot Qty'], data['Sample Qty'], data['Total Defect'], data['SRR']]];
         
-        let details = [
-            [{ text: "Defect Details", bold:true, fill:"F5F5F5" }, { text: `F: ${fd.get('Func Defect Details')} (${fd.get('Func Qty')}) | A: ${fd.get('Aes Defect Details')} (${fd.get('Aes Qty')})` }],
-            [{ text: "Process Info", bold:true, fill:"F5F5F5" }, { text: `MC Date: ${fd.get('Master Carton Date')} | LQC: ${fd.get('LQC Name')} | FT: ${fd.get('FT Name')}` }]
-        ];
-        slide.addTable(details, { x: 0.2, y: 2.4, w: 9.6, colW: [2, 7.6], fontSize: 10, border: { color: "DDDDDD" } });
+        slide.addTable([...headers, ...values], {
+            x: 0.5, y: 1.4, w: 9, align: 'center',
+            fill: { color: "F7F7F7" }, border: { color: "CCCCCC" },
+            color: "333333", fontSize: 12
+        });
 
-        // 3. Action Plan
-        slide.addText("Action Plan", { x: 0.2, y: 3.5, fontSize: 12, color: "1565C0", bold: true });
-        let actionRows = [
-            [{ text: "Problem", bold:true }, { text: fd.get('Problem Desc') }],
-            [{ text: "Root Cause", bold:true }, { text: fd.get('Root Cause') }],
-            [{ text: "Corrective Action", bold:true }, { text: fd.get('Corrective Action') }]
-        ];
-        slide.addTable(actionRows, { x: 0.2, y: 3.7, w: 6.0, colW: [1.5, 4.5], fontSize: 10, border: { color: "DDDDDD" } });
+        // 2. Defect Breakdown
+        slide.addText("Defect Breakdown", { x: 0.5, y: 2.3, fontSize: 12, color: "002d72", bold: true });
+        let defectText = `Function: ${data['Func Details']} (${data['Func Qty']})\n` +
+                         `Aesthetic: ${data['Aes Details']} (${data['Aes Qty']})\n` +
+                         `Packing: ${data['Pack Details']} (${data['Pack Qty']})`;
+        slide.addText(defectText, { x: 0.5, y: 2.5, w: 9, h: 1.0, fontSize: 11, color: "333333", shape: pres.ShapeType.rect, fill: "FFFFFF", line: "DDDDDD" });
 
-        // 4. Evidence Image Placement (Right Side)
-        if (imgData) {
-            slide.addText("Evidence", { x: 6.5, y: 3.5, fontSize: 12, color: "C62828", bold: true });
-            slide.addImage({ data: imgData, x: 6.5, y: 3.7, w: 3.0, h: 1.8 });
+        // 3. Traceability & Action Plan
+        slide.addText("Traceability & Action Plan", { x: 0.5, y: 3.7, fontSize: 12, color: "002d72", bold: true });
+        let traceText = `MC Date: ${data['MC Date']}  |  LQC: ${data['LQC Name']}  |  FT: ${data['FT Name']}`;
+        slide.addText(traceText, { x: 0.5, y: 3.9, w: 9, fontSize: 10, italic: true, color: "666666" });
+
+        let capTable = [
+            [{ text: "Problem", bold:true }, data['Problem']],
+            [{ text: "Root Cause", bold:true }, data['Root Cause']],
+            [{ text: "Corrective Action", bold:true }, data['Corrective']],
+            [{ text: "Preventive", bold:true }, data['Preventive']]
+        ];
+        slide.addTable(capTable, { x: 0.5, y: 4.2, w: 6, colW: [1.5, 4.5], fontSize: 10, border: { color: "AAAAAA" } });
+
+        // 4. Evidence Images (Right Side)
+        if (images && images.length > 0) {
+            slide.addText("Evidence", { x: 6.8, y: 3.7, fontSize: 11, bold: true });
+            // Add up to 2 images stacked
+            if(images[0]) slide.addImage({ data: images[0], x: 6.8, y: 4.0, w: 2.5, h: 1.5 });
+            if(images[1]) slide.addImage({ data: images[1], x: 6.8, y: 5.6, w: 2.5, h: 1.5 }); // Might overlap bottom line, adjust if needed
         }
 
-        pres.writeFile({ fileName: `PDI_${fd.get('Model')}.pptx` });
+        pres.writeFile({ fileName: `PDI_${data['Model']}_${data['Date']}.pptx` });
     }
 </script>
 
