@@ -4,165 +4,183 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Califonix Quality Dashboard</title>
+    <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     
     <style>
-        :root { --primary: #002d72; --accent: #e31837; --bg: #f4f7f6; }
+        /* Modern Clean Look */
+        :root { --primary: #003366; --accent: #D32F2F; --bg: #F0F4F8; }
         body { background-color: var(--bg); font-family: 'Segoe UI', sans-serif; }
         
-        /* Branding */
-        .brand-text { font-weight: 800; font-size: 1.5rem; letter-spacing: 1px; color: var(--primary); }
-        .brand-accent { color: var(--accent); }
-        .navbar { background: #fff; border-bottom: 3px solid var(--accent); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-
-        /* Cards */
-        .card { border: none; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); margin-bottom: 15px; }
-        .card-header { background: white; border-bottom: 1px solid #eee; font-weight: 700; color: #555; }
-        .form-label { font-size: 0.85rem; font-weight: 600; color: #666; margin-bottom: 2px; }
-        .form-control, .form-select { font-size: 0.9rem; border-color: #ddd; }
-        .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 0.2rem rgba(0, 45, 114, 0.1); }
-
-        /* Evidence */
-        .img-thumb { height: 60px; width: 60px; object-fit: cover; border: 1px solid #ddd; margin: 2px; border-radius: 4px; }
-
+        .navbar { background: white; border-top: 4px solid var(--accent); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .logo-text { font-weight: 800; font-size: 24px; color: black; letter-spacing: 1px; }
+        .logo-icon { color: #6A1B9A; font-size: 24px; vertical-align: middle; margin-right: 5px; }
+        
+        .card { border: none; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); margin-bottom: 20px; background: white; }
+        .card-header { background: #f8f9fa; border-bottom: 2px solid #e9ecef; font-weight: 700; color: var(--primary); }
+        
+        .form-label { font-size: 12px; font-weight: 700; color: #555; text-transform: uppercase; margin-bottom: 2px; }
+        .form-control, .form-select { font-size: 14px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        .form-control:focus { border-color: var(--primary); box-shadow: none; }
+        
         /* Dashboard Table */
-        .table thead { background-color: var(--primary); color: white; font-size: 0.9rem; }
-        .btn-action { padding: 2px 8px; font-size: 0.8rem; }
+        .table-custom thead { background: var(--primary); color: white; }
+        .table-custom th, .table-custom td { font-size: 13px; vertical-align: middle; text-align: center; }
+        
+        /* Evidence Thumbs */
+        .thumb-box img { height: 50px; width: 50px; object-fit: cover; border: 1px solid #ccc; margin-right: 5px; }
     </style>
 </head>
 <body>
 
-<!-- Navbar -->
-<nav class="navbar fixed-top">
-    <div class="container-fluid px-4">
-        <div class="d-flex align-items-center gap-2">
-            <!-- CSS Logo to fix "Image not loading" issue -->
-            <div class="brand-text">CALIF<span class="brand-accent">ONIX</span></div>
-        </div>
-        <ul class="nav nav-pills" role="tablist">
-            <li class="nav-item"><button class="nav-link active" id="tab-form" data-bs-toggle="pill" data-bs-target="#pills-form">New Entry</button></li>
-            <li class="nav-item"><button class="nav-link" id="tab-dash" data-bs-toggle="pill" data-bs-target="#pills-dash" onclick="loadDashboard()">Live Dashboard</button></li>
-        </ul>
+<!-- Navbar with Fixed Logo -->
+<nav class="navbar fixed-top px-4">
+    <div class="d-flex align-items-center">
+        <!-- Logo built with CSS/Icons so it never fails -->
+        <i class="bi bi-play-circle-fill logo-icon"></i>
+        <span class="logo-text">CALIF<span style="color:#D32F2F">ONIX</span></span>
+    </div>
+    <div class="nav nav-pills">
+        <button class="nav-link active rounded-pill px-4" id="tab-form" data-bs-toggle="pill" data-bs-target="#pills-form">New Entry</button>
+        <button class="nav-link rounded-pill px-4" id="tab-dash" data-bs-toggle="pill" data-bs-target="#pills-dash" onclick="loadDashboard()">Live Dashboard</button>
     </div>
 </nav>
 
-<div class="container" style="margin-top: 80px; padding-bottom: 50px;">
+<div class="container" style="margin-top: 90px; padding-bottom: 50px;">
     <div class="tab-content">
         
-        <!-- === FORM TAB === -->
+        <!-- FORM SECTION -->
         <div class="tab-pane fade show active" id="pills-form">
             <form id="pdiForm">
                 <input type="hidden" name="action" id="formAction" value="save">
                 <input type="hidden" name="editRowId" id="editRowId">
 
-                <!-- 1. General Info -->
+                <!-- 1. Top Info -->
                 <div class="card">
-                    <div class="card-header text-primary"><i class="bi bi-info-circle-fill me-2"></i>General Information</div>
+                    <div class="card-header"><i class="bi bi-grid me-2"></i>General Info</div>
                     <div class="card-body">
                         <div class="row g-2">
                             <div class="col-md-2"><label class="form-label">Date</label><input type="date" name="Date" class="form-control" required></div>
-                            <div class="col-md-2"><label class="form-label">Model</label><input type="text" name="Model" class="form-control" required></div>
+                            <div class="col-md-3"><label class="form-label">Model Name</label><input type="text" name="Model" class="form-control" required></div>
                             <div class="col-md-2"><label class="form-label">Line No</label><input type="text" name="Line No" class="form-control" required></div>
                             <div class="col-md-2"><label class="form-label">Colour</label><input type="text" name="Colour" class="form-control"></div>
-                            <div class="col-md-2"><label class="form-label">Lot Qty</label><input type="number" name="Lot Qty" class="form-control"></div>
-                            <div class="col-md-2"><label class="form-label">Sample Qty</label><input type="number" name="Sample Qty" id="sampleQty" class="form-control" oninput="calc()"></div>
-                        </div>
-                        <div class="row g-2 mt-1 bg-light p-2 rounded">
-                            <div class="col-md-2"><label class="form-label text-danger">Total Defects</label><input type="text" name="Total Defect" id="totalDefect" class="form-control fw-bold text-danger" readonly></div>
-                            <div class="col-md-2"><label class="form-label text-danger">SRR %</label><input type="text" name="SRR" id="srrRate" class="form-control fw-bold text-danger" readonly></div>
+                            <div class="col-md-3"><label class="form-label">Lot Qty</label><input type="number" name="Lot Qty" class="form-control"></div>
+                            <div class="col-md-3"><label class="form-label">Sample Qty</label><input type="number" name="Sample Qty" id="sampleQty" class="form-control" oninput="calc()"></div>
+                            <div class="col-md-3"><label class="form-label text-danger">Total Defects</label><input type="number" name="Total Defect" id="totalDefect" class="form-control fw-bold" readonly></div>
+                            <div class="col-md-3"><label class="form-label text-danger">SRR %</label><input type="text" name="SRR" id="srrRate" class="form-control fw-bold" readonly></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- 2. Defects -->
                 <div class="card">
-                    <div class="card-header text-danger"><i class="bi bi-bug-fill me-2"></i>Defect Breakdown</div>
-                    <div class="card-body p-2">
-                        <table class="table table-borderless m-0">
-                            <tr>
-                                <td width="15%" class="fw-bold">Function</td>
-                                <td><input type="text" name="Func Details" id="fDet" class="form-control form-control-sm" placeholder="Detail..."></td>
-                                <td width="10%"><input type="number" name="Func Qty" id="fQty" class="form-control form-control-sm" placeholder="Qty" oninput="calc()"></td>
-                            </tr>
-                            <tr>
-                                <td class="fw-bold">Aesthetic</td>
-                                <td><input type="text" name="Aes Details" id="aDet" class="form-control form-control-sm" placeholder="Detail..."></td>
-                                <td><input type="number" name="Aes Qty" id="aQty" class="form-control form-control-sm" placeholder="Qty" oninput="calc()"></td>
-                            </tr>
-                            <tr>
-                                <td class="fw-bold">Packing</td>
-                                <td><input type="text" name="Pack Details" id="pDet" class="form-control form-control-sm" placeholder="Detail..."></td>
-                                <td><input type="number" name="Pack Qty" id="pQty" class="form-control form-control-sm" placeholder="Qty" oninput="calc()"></td>
-                            </tr>
+                    <div class="card-header text-danger"><i class="bi bi-bug me-2"></i>Defect Details</div>
+                    <div class="card-body p-0">
+                        <table class="table table-bordered mb-0">
+                            <thead class="bg-light"><tr><th width="15%">Type</th><th>Description</th><th width="10%">Qty</th></tr></thead>
+                            <tbody>
+                                <tr>
+                                    <td class="fw-bold">Function</td>
+                                    <td><input type="text" name="Func Details" id="fDet" class="form-control border-0" placeholder="Describe functional issue..."></td>
+                                    <td><input type="number" name="Func Qty" id="fQty" class="form-control border-0 text-center" oninput="calc()"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Aesthetic</td>
+                                    <td><input type="text" name="Aes Details" id="aDet" class="form-control border-0" placeholder="Describe cosmetic issue..."></td>
+                                    <td><input type="number" name="Aes Qty" id="aQty" class="form-control border-0 text-center" oninput="calc()"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Packing</td>
+                                    <td><input type="text" name="Pack Details" id="pDet" class="form-control border-0" placeholder="Describe packing issue..."></td>
+                                    <td><input type="number" name="Pack Qty" id="pQty" class="form-control border-0 text-center" oninput="calc()"></td>
+                                </tr>
+                            </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- 3. Process Traceability -->
+                <!-- 3. Traceability -->
                 <div class="card">
-                    <div class="card-header text-success"><i class="bi bi-clock-history me-2"></i>Traceability</div>
+                    <div class="card-header text-success"><i class="bi bi-search me-2"></i>Traceability</div>
                     <div class="card-body">
                         <div class="row g-2">
-                            <div class="col-md-3"><label class="form-label">Master Carton</label><input type="datetime-local" name="MC Date" class="form-control"></div>
-                            <div class="col-md-3"><label class="form-label">LQC Date</label><input type="datetime-local" name="LQC Date" class="form-control"></div>
-                            <div class="col-md-3"><label class="form-label">LQC Name</label><input type="text" name="LQC Name" class="form-control"></div>
-                            <div class="col-md-3"><label class="form-label">Belongs To</label><select name="Belongs To" class="form-select"><option>Buds</option><option>Case</option></select></div>
-                            <div class="col-md-3"><label class="form-label">FT Date</label><input type="datetime-local" name="FT Date" class="form-control"></div>
-                            <div class="col-md-3"><label class="form-label">FT Name</label><input type="text" name="FT Name" class="form-control"></div>
+                            <div class="col-md-3"><label class="form-label">Master Carton Date</label><input type="datetime-local" name="MC Date" class="form-control"></div>
+                            <div class="col-md-3"><label class="form-label">Defect Belongs To</label><select name="Belongs To" class="form-select"><option>Buds</option><option>Case</option></select></div>
                             <div class="col-md-3"><label class="form-label">BT Attempt</label><select name="BT Attempt" class="form-select"><option>Yes</option><option>No</option></select></div>
                             <div class="col-md-3"><label class="form-label">RF Attempt</label><select name="RF Attempt" class="form-select"><option>Yes</option><option>No</option></select></div>
+                            
+                            <div class="col-md-6 border p-2 rounded bg-light">
+                                <label class="form-label">LQC Details</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">Date</span>
+                                    <input type="datetime-local" name="LQC Date" class="form-control">
+                                    <span class="input-group-text">Name</span>
+                                    <input type="text" name="LQC Name" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-6 border p-2 rounded bg-light">
+                                <label class="form-label">FT Details</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">Date</span>
+                                    <input type="datetime-local" name="FT Date" class="form-control">
+                                    <span class="input-group-text">Name</span>
+                                    <input type="text" name="FT Name" class="form-control">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 4. CAPA & Evidence -->
-                <div class="card border-danger">
-                    <div class="card-header bg-danger text-white">Action Plan</div>
+                <!-- 4. Action Plan -->
+                <div class="card border-top border-3 border-danger">
+                    <div class="card-header bg-white text-danger fw-bold"><i class="bi bi-lightning-fill me-2"></i>Action Plan & Evidence</div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-8">
                                 <label class="form-label">Team Formation</label><input type="text" name="Team" class="form-control mb-2">
-                                <label class="form-label fw-bold">Problem (Auto)</label><input type="text" name="Problem" id="problemDesc" class="form-control mb-2 bg-light fw-bold" readonly>
+                                <label class="form-label">Problem (Auto)</label><input type="text" name="Problem" id="problemDesc" class="form-control mb-2 fw-bold bg-light" readonly>
                                 <label class="form-label">Root Cause</label><textarea name="Root Cause" class="form-control mb-2" rows="1"></textarea>
                                 <label class="form-label">Corrective Action</label><textarea name="Corrective" class="form-control mb-2" rows="1"></textarea>
                                 <label class="form-label">Preventive Action</label><textarea name="Preventive" class="form-control" rows="1"></textarea>
                             </div>
                             <div class="col-md-4 border-start text-center">
-                                <label class="form-label fw-bold d-block">Upload Evidence (Multiple)</label>
-                                <input type="file" id="evidenceInput" class="form-control mb-2" accept="image/*" multiple onchange="handleEvidence()">
-                                <div id="evidencePreviewBox" class="d-flex flex-wrap justify-content-center gap-1"></div>
+                                <label class="form-label d-block mb-3">Upload Evidence (Images)</label>
+                                <label class="btn btn-outline-primary btn-sm mb-2">
+                                    <i class="bi bi-camera"></i> Choose Files
+                                    <input type="file" id="evidenceInput" hidden multiple accept="image/*" onchange="handleEvidence()">
+                                </label>
+                                <div id="evidencePreviewBox" class="thumb-box d-flex flex-wrap justify-content-center gap-2"></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Buttons -->
                 <div class="d-flex justify-content-end gap-2 my-4">
-                    <button type="button" class="btn btn-warning" onclick="resetForm()">Clear</button>
-                    <button type="button" class="btn btn-info text-white" onclick="showFullPreview()">Preview Full Report</button>
-                    <button type="submit" class="btn btn-success px-4" id="saveBtn">Save Record</button>
+                    <button type="button" class="btn btn-light border" onclick="resetForm()">Clear</button>
+                    <button type="button" class="btn btn-dark" onclick="showFullPreview()"><i class="bi bi-eye"></i> Preview</button>
+                    <button type="submit" class="btn btn-primary px-4" id="saveBtn"><i class="bi bi-cloud-arrow-up"></i> Save to Cloud</button>
                 </div>
             </form>
         </div>
 
-        <!-- === DASHBOARD TAB === -->
+        <!-- DASHBOARD SECTION -->
         <div class="tab-pane fade" id="pills-dash">
             <div class="card p-3">
-                <div class="row g-2 align-items-end mb-3">
-                    <div class="col-md-3"><label class="form-label">From Date</label><input type="date" id="filterStart" class="form-control"></div>
-                    <div class="col-md-3"><label class="form-label">To Date</label><input type="date" id="filterEnd" class="form-control"></div>
-                    <div class="col-md-3"><button class="btn btn-primary w-100" onclick="loadDashboard()">Apply Filter</button></div>
-                    <div class="col-md-3"><button class="btn btn-outline-secondary w-100" onclick="loadDashboard()">Show All</button></div>
+                <div class="row g-2 mb-3">
+                    <div class="col-md-3"><input type="date" id="filterStart" class="form-control"></div>
+                    <div class="col-md-3"><input type="date" id="filterEnd" class="form-control"></div>
+                    <div class="col-md-2"><button class="btn btn-primary w-100" onclick="loadDashboard()">Filter</button></div>
+                    <div class="col-md-2"><button class="btn btn-secondary w-100" onclick="loadDashboard()">Show All</button></div>
                 </div>
-                
                 <div class="table-responsive">
-                    <table class="table table-hover table-bordered text-center align-middle">
-                        <thead class="table-dark">
+                    <table class="table table-custom table-hover table-bordered">
+                        <thead>
                             <tr>
-                                <th>Date</th><th>Model</th><th>Line</th><th>Total Defect</th><th>Action Plan</th><th>Actions</th>
+                                <th>Date</th><th>Model</th><th>Line</th><th>Total Defect</th><th>SRR %</th><th>Problem</th><th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="dashData"></tbody>
@@ -174,46 +192,45 @@
     </div>
 </div>
 
-<!-- Full Preview Modal -->
+<!-- PREVIEW MODAL -->
 <div class="modal fade" id="previewModal" tabindex="-1">
-    <div class="modal-dialog modal-xl">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Inspection Report Preview</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title">Inspection Report</h5>
+                <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body bg-white" id="previewContent"></div>
+            <div class="modal-body" id="previewContent"></div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger" onclick="downloadPPT()"><i class="bi bi-file-ppt-fill"></i> Download Professional PPT</button>
+                <button class="btn btn-danger" onclick="downloadPPT()"><i class="bi bi-file-ppt"></i> Download PPT</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // URL REPLACE KAREIN
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_s1aGTlzKo__fW9j4lrqeyXwKJjmQjXVQKj0CIVdOK_940lsaMXYbSXdgaOrduhEX/exec'; 
-    
-    let evidenceImages = []; // Stores Base64 strings
+    // --- YOUR GOOGLE SCRIPT URL HERE ---
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxM5JZ5_7fw5QOo3n8L7rfTU_7qfC8PSWYPCy0jGeCYZUUHwNzJmYUhlwYIsg1SRA/exec';
 
-    // 1. Evidence Handling (Multiple)
+    let evidenceImages = [];
+
+    // 1. Evidence Handling
     function handleEvidence() {
         const files = document.getElementById('evidenceInput').files;
-        const previewBox = document.getElementById('evidencePreviewBox');
-        previewBox.innerHTML = '';
+        const box = document.getElementById('evidencePreviewBox');
+        box.innerHTML = '';
         evidenceImages = [];
-
         Array.from(files).forEach(file => {
             const reader = new FileReader();
             reader.onload = e => {
                 evidenceImages.push(e.target.result);
-                previewBox.innerHTML += `<img src="${e.target.result}" class="img-thumb">`;
+                box.innerHTML += `<img src="${e.target.result}">`;
             };
             reader.readAsDataURL(file);
         });
     }
 
-    // 2. Calculation & Problem Auto-Fill
+    // 2. Calculation
     function calc() {
         const f = Number(document.getElementById('fQty').value) || 0;
         const a = Number(document.getElementById('aQty').value) || 0;
@@ -224,46 +241,41 @@
         document.getElementById('totalDefect').value = total;
         document.getElementById('srrRate').value = sample > 0 ? ((total/sample)*100).toFixed(2) + '%' : '0%';
 
-        let prob = "No Major Issues";
-        if (f > 0) prob = `Function: ${document.getElementById('fDet').value} (${f})`;
-        else if (a > 0) prob = `Aesthetic: ${document.getElementById('aDet').value} (${a})`;
-        else if (p > 0) prob = `Packing: ${document.getElementById('pDet').value} (${p})`;
-        document.getElementById('problemDesc').value = prob;
+        let prob = "";
+        if(f>0) prob = `Function: ${document.getElementById('fDet').value} (${f})`;
+        else if(a>0) prob = `Aesthetic: ${document.getElementById('aDet').value} (${a})`;
+        else if(p>0) prob = `Packing: ${document.getElementById('pDet').value} (${p})`;
+        document.getElementById('problemDesc').value = prob || "No Major Issues";
     }
 
-    // 3. Save / Update Logic
-    const form = document.getElementById('pdiForm');
-    form.addEventListener('submit', e => {
+    // 3. Save Data
+    document.getElementById('pdiForm').addEventListener('submit', e => {
         e.preventDefault();
         const btn = document.getElementById('saveBtn');
-        btn.innerText = "Saving..."; btn.disabled = true;
-
-        fetch(SCRIPT_URL, { method: 'POST', body: new FormData(form) })
+        btn.innerHTML = 'Saving...'; btn.disabled = true;
+        
+        fetch(SCRIPT_URL, { method: 'POST', body: new FormData(e.target) })
         .then(res => res.json())
         .then(data => {
             alert(data.message);
             resetForm();
-            btn.innerText = "Save Record"; btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-cloud-arrow-up"></i> Save to Cloud'; btn.disabled = false;
         })
-        .catch(err => { alert("Error saving data"); btn.disabled = false; });
+        .catch(err => { alert("Error"); btn.disabled = false; });
     });
 
     function resetForm() {
-        form.reset();
+        document.getElementById('pdiForm').reset();
         document.getElementById('formAction').value = 'save';
         document.getElementById('editRowId').value = '';
-        document.getElementById('saveBtn').innerText = "Save Record";
-        document.getElementById('saveBtn').classList.remove('btn-warning');
-        document.getElementById('saveBtn').classList.add('btn-success');
         document.getElementById('evidencePreviewBox').innerHTML = '';
         evidenceImages = [];
     }
 
-    // 4. Dashboard (Filter, Load, Edit, Delete)
+    // 4. Dashboard (Fixed Indices)
     function loadDashboard() {
         const tbody = document.getElementById('dashData');
-        tbody.innerHTML = '<tr><td colspan="6">Loading...</td></tr>';
-        
+        tbody.innerHTML = '<tr><td colspan="7">Loading...</td></tr>';
         const start = document.getElementById('filterStart').value;
         const end = document.getElementById('filterEnd').value;
 
@@ -271,29 +283,28 @@
         .then(res => res.json())
         .then(json => {
             tbody.innerHTML = '';
-            // Data Structure: [RowID, Date, Model, Line, Colour, Lot, Sample, Total, SRR, ...]
-            // Index Mapping: 0=ID, 1=Date, 2=Model, 3=Line, 7=Total, 24=Problem
-            
             const rows = json.data.filter(row => {
                 if(!start || !end) return true;
                 return row[1] >= start && row[1] <= end;
             });
-
-            if(rows.length === 0) tbody.innerHTML = '<tr><td colspan="6">No Data Found</td></tr>';
+            
+            if(rows.length === 0) tbody.innerHTML = '<tr><td colspan="7">No Data</td></tr>';
 
             rows.forEach(row => {
                 let jsonRow = encodeURIComponent(JSON.stringify(row));
+                // Indices: 0=ID, 1=Date, 2=Model, 3=Line, 7=TotalDefect, 8=SRR, 24=Problem
                 tbody.innerHTML += `
                     <tr>
                         <td>${row[1]}</td>
                         <td>${row[2]}</td>
                         <td>${row[3]}</td>
-                        <td><span class="badge bg-danger">${row[7]}</span></td>
+                        <td class="fw-bold text-danger">${row[7]}</td>
+                        <td>${row[8]}</td>
                         <td class="small text-start">${row[24]}</td>
                         <td>
-                            <button class="btn btn-warning btn-action" onclick="editRecord('${jsonRow}')">Edit</button>
-                            <button class="btn btn-danger btn-action" onclick="deleteRecord(${row[0]})">Del</button>
-                            <button class="btn btn-success btn-action" onclick="pptFromRow('${jsonRow}')">PPT</button>
+                            <button class="btn btn-sm btn-warning" onclick="editRecord('${jsonRow}')"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteRecord(${row[0]})"><i class="bi bi-trash"></i></button>
+                            <button class="btn btn-sm btn-success" onclick="pptFromRow('${jsonRow}')"><i class="bi bi-file-ppt"></i></button>
                         </td>
                     </tr>
                 `;
@@ -301,179 +312,146 @@
         });
     }
 
-    function editRecord(rowStr) {
-        const row = JSON.parse(decodeURIComponent(rowStr));
-        // Switch to form
+    function editRecord(str) {
+        const r = JSON.parse(decodeURIComponent(str));
         document.getElementById('tab-form').click();
+        const f = document.getElementById('pdiForm').elements;
         
-        // Populate fields (Indices based on Google Sheet order)
         document.getElementById('formAction').value = 'edit';
-        document.getElementById('editRowId').value = row[0];
+        document.getElementById('editRowId').value = r[0];
         
-        const inputs = form.elements;
-        inputs['Date'].value = row[1];
-        inputs['Model'].value = row[2];
-        inputs['Line No'].value = row[3];
-        inputs['Colour'].value = row[4];
-        inputs['Lot Qty'].value = row[5];
-        inputs['Sample Qty'].value = row[6];
-        inputs['Total Defect'].value = row[7];
-        inputs['SRR'].value = row[8];
-        inputs['Func Details'].value = row[9]; inputs['Func Qty'].value = row[10];
-        inputs['Aes Details'].value = row[11]; inputs['Aes Qty'].value = row[12];
-        inputs['Pack Details'].value = row[13]; inputs['Pack Qty'].value = row[14];
-        inputs['MC Date'].value = row[15];
-        inputs['LQC Date'].value = row[16]; inputs['LQC Name'].value = row[17];
-        inputs['FT Date'].value = row[18]; inputs['FT Name'].value = row[19];
-        inputs['Belongs To'].value = row[20];
-        inputs['BT Attempt'].value = row[21];
-        inputs['RF Attempt'].value = row[22];
-        inputs['Team'].value = row[23];
-        inputs['Problem'].value = row[24];
-        inputs['Root Cause'].value = row[25];
-        inputs['Corrective'].value = row[26];
-        inputs['Preventive'].value = row[27];
-
-        const btn = document.getElementById('saveBtn');
-        btn.innerText = "Update Record";
-        btn.classList.remove('btn-success');
-        btn.classList.add('btn-warning');
+        // Populate
+        f['Date'].value = r[1]; f['Model'].value = r[2]; f['Line No'].value = r[3];
+        f['Colour'].value = r[4]; f['Lot Qty'].value = r[5]; f['Sample Qty'].value = r[6];
+        f['Total Defect'].value = r[7]; f['SRR'].value = r[8];
+        f['Func Details'].value = r[9]; f['Func Qty'].value = r[10];
+        f['Aes Details'].value = r[11]; f['Aes Qty'].value = r[12];
+        f['Pack Details'].value = r[13]; f['Pack Qty'].value = r[14];
+        f['MC Date'].value = r[15];
+        f['LQC Date'].value = r[16]; f['LQC Name'].value = r[17];
+        f['FT Date'].value = r[18]; f['FT Name'].value = r[19];
+        f['Belongs To'].value = r[20]; f['BT Attempt'].value = r[21]; f['RF Attempt'].value = r[22];
+        f['Team'].value = r[23]; f['Problem'].value = r[24]; f['Root Cause'].value = r[25];
+        f['Corrective'].value = r[26]; f['Preventive'].value = r[27];
     }
 
     function deleteRecord(id) {
-        if(!confirm("Are you sure?")) return;
+        if(!confirm("Delete?")) return;
         const fd = new FormData();
-        fd.append('action', 'delete');
-        fd.append('rowIndex', id);
-        fetch(SCRIPT_URL, { method:'POST', body:fd }).then(() => loadDashboard());
+        fd.append('action','delete'); fd.append('rowIndex', id);
+        fetch(SCRIPT_URL, {method:'POST', body:fd}).then(()=>loadDashboard());
     }
 
-    // 5. Preview Full Details
+    // 5. Full Preview
     function showFullPreview() {
-        const fd = new FormData(form);
-        let html = `
-            <div class="border p-4">
-                <div class="d-flex justify-content-between border-bottom pb-2 mb-3">
-                    <h2 class="text-primary fw-bold">CALIF<span class="text-danger">ONIX</span></h2>
-                    <div class="text-end">
-                        <h5>PDI REPORT</h5>
-                        <small>Date: ${fd.get('Date')} | Model: ${fd.get('Model')}</small>
-                    </div>
-                </div>
+        const fd = new FormData(document.getElementById('pdiForm'));
+        const html = `
+            <div class="border p-3">
+                <h5 class="text-primary border-bottom">Traceability Check</h5>
+                <ul class="list-group list-group-flush mb-3 small">
+                   <li class="list-group-item"><strong>MC Date:</strong> ${fd.get('MC Date')}</li>
+                   <li class="list-group-item"><strong>LQC:</strong> ${fd.get('LQC Date')} by ${fd.get('LQC Name')}</li>
+                   <li class="list-group-item"><strong>FT:</strong> ${fd.get('FT Date')} by ${fd.get('FT Name')}</li>
+                   <li class="list-group-item"><strong>Attempts:</strong> BT: ${fd.get('BT Attempt')} | RF: ${fd.get('RF Attempt')}</li>
+                   <li class="list-group-item"><strong>Belongs To:</strong> ${fd.get('Belongs To')}</li>
+                </ul>
+                <h5 class="text-primary border-bottom">Defects</h5>
+                <p>Func: ${fd.get('Func Details')} (${fd.get('Func Qty')})</p>
+                <p>Aes: ${fd.get('Aes Details')} (${fd.get('Aes Qty')})</p>
                 
-                <table class="table table-bordered table-sm text-center">
-                    <tr class="table-secondary"><th>Line</th><th>Lot Qty</th><th>Sample</th><th>Defects</th><th>SRR</th></tr>
-                    <tr><td>${fd.get('Line No')}</td><td>${fd.get('Lot Qty')}</td><td>${fd.get('Sample Qty')}</td><td class="text-danger fw-bold">${fd.get('Total Defect')}</td><td>${fd.get('SRR')}</td></tr>
-                </table>
-
-                <h6 class="text-primary mt-3 border-bottom">Defect Analysis</h6>
-                <table class="table table-sm table-bordered">
-                    <tr><th>Type</th><th>Details</th><th>Qty</th></tr>
-                    <tr><td>Function</td><td>${fd.get('Func Details')}</td><td>${fd.get('Func Qty')}</td></tr>
-                    <tr><td>Aesthetic</td><td>${fd.get('Aes Details')}</td><td>${fd.get('Aes Qty')}</td></tr>
-                    <tr><td>Packing</td><td>${fd.get('Pack Details')}</td><td>${fd.get('Pack Qty')}</td></tr>
-                </table>
-
-                <h6 class="text-primary mt-3 border-bottom">Action Plan</h6>
-                <table class="table table-bordered table-sm">
-                    <tr><td width="30%" class="bg-light fw-bold">Problem</td><td>${fd.get('Problem')}</td></tr>
-                    <tr><td class="bg-light fw-bold">Root Cause</td><td>${fd.get('Root Cause')}</td></tr>
-                    <tr><td class="bg-light fw-bold">Corrective Action</td><td>${fd.get('Corrective')}</td></tr>
-                    <tr><td class="bg-light fw-bold">Preventive Action</td><td>${fd.get('Preventive')}</td></tr>
-                </table>
-
-                <h6 class="text-primary mt-3">Evidence</h6>
-                <div class="d-flex gap-2">
-                    ${evidenceImages.map(img => `<img src="${img}" style="height:100px; border:1px solid #ccc">`).join('')}
-                </div>
+                <h5 class="text-primary border-bottom">Images</h5>
+                <div class="d-flex gap-2">${evidenceImages.map(s=>`<img src="${s}" height="80">`).join('')}</div>
             </div>
         `;
         document.getElementById('previewContent').innerHTML = html;
         new bootstrap.Modal(document.getElementById('previewModal')).show();
     }
 
-    // 6. Professional PPT (Full Details + Images)
+    // 6. Professional PPT Generation
     function downloadPPT() {
-        // Collect data from Form
-        const fd = new FormData(form);
-        const dataObj = {};
-        fd.forEach((v,k) => dataObj[k] = v);
-        generatePPT(dataObj, evidenceImages);
+        const fd = new FormData(document.getElementById('pdiForm'));
+        const d = {};
+        fd.forEach((v,k)=>d[k]=v);
+        generatePPT(d, evidenceImages);
     }
 
-    function pptFromRow(jsonStr) {
-        const row = JSON.parse(decodeURIComponent(jsonStr));
-        // Map Array to Object keys manually
-        const dataObj = {
-            'Date': row[1], 'Model': row[2], 'Line No': row[3], 'Lot Qty': row[5], 'Sample Qty': row[6],
-            'Total Defect': row[7], 'SRR': row[8],
-            'Func Details': row[9], 'Func Qty': row[10], 'Aes Details': row[11], 'Aes Qty': row[12], 'Pack Details': row[13], 'Pack Qty': row[14],
-            'MC Date': row[15], 'LQC Name': row[17], 'FT Name': row[19],
-            'Problem': row[24], 'Root Cause': row[25], 'Corrective': row[26], 'Preventive': row[27]
+    function pptFromRow(str) {
+        const r = JSON.parse(decodeURIComponent(str));
+        const d = {
+            'Date': r[1], 'Model': r[2], 'Line No': r[3], 'Lot Qty': r[5], 'Sample Qty': r[6],
+            'Total Defect': r[7], 'SRR': r[8],
+            'Func Details': r[9], 'Func Qty': r[10], 'Aes Details': r[11], 'Aes Qty': r[12], 'Pack Details': r[13], 'Pack Qty': r[14],
+            'MC Date': r[15], 'LQC Date': r[16], 'LQC Name': r[17], 'FT Date': r[18], 'FT Name': r[19],
+            'Belongs To': r[20], 'BT Attempt': r[21], 'RF Attempt': r[22],
+            'Problem': r[24], 'Root Cause': r[25], 'Corrective': r[26], 'Preventive': r[27]
         };
-        // Note: Dashboard doesn't store images in sheet (too heavy), so passing empty array
-        generatePPT(dataObj, []); 
+        generatePPT(d, []);
     }
 
-    function generatePPT(data, images) {
+    function generatePPT(data, imgs) {
         let pres = new PptxGenJS();
         
-        // Master Slide with Califonix Branding
-        pres.defineSlideMaster({
-            title: "CALIFONIX_MASTER",
-            background: { color: "FFFFFF" },
-            objects: [
-                { rect: { x: 0, y: 0, w: "100%", h: 0.8, fill: "002d72" } },
-                { text: { text: "CALIFONIX QUALITY REPORT", options: { x: 0.5, y: 0.2, color: "FFFFFF", fontSize: 18, bold: true } } },
-                { line: { x: 0, y: 5.2, w: "100%", h: 0, line: "e31837", lineSize: 3 } } // Bottom Red Line
-            ]
-        });
+        // Define Slide with Blue Background
+        let slide = pres.addSlide();
+        slide.background = { color: "E3F2FD" }; // Light Blue Background
 
-        let slide = pres.addSlide({ masterName: "CALIFONIX_MASTER" });
-
-        // Header Info
-        slide.addText(`Model: ${data['Model']}   |   Date: ${data['Date']}   |   Line: ${data['Line No']}`, 
-            { x: 0.5, y: 1.0, fontSize: 14, color: "444444", bold: true });
-
-        // 1. Metrics Table
-        let headers = [['Lot Qty', 'Sample Qty', 'Total Defect', 'SRR %']];
-        let values = [[data['Lot Qty'], data['Sample Qty'], data['Total Defect'], data['SRR']]];
+        // HEADER
+        slide.addShape(pres.ShapeType.rect, { x: 0, y: 0, w: '100%', h: 0.8, fill: "003366" });
+        slide.addText("CALIFONIX PDI REPORT", { x: 0.2, y: 0.1, fontSize: 20, color: "FFFFFF", bold: true });
         
-        slide.addTable([...headers, ...values], {
-            x: 0.5, y: 1.4, w: 9, align: 'center',
-            fill: { color: "F7F7F7" }, border: { color: "CCCCCC" },
-            color: "333333", fontSize: 12
-        });
+        // --- SECTION 1: INFO CARDS (Top) ---
+        // Box 1: General
+        slide.addShape(pres.ShapeType.rect, { x: 0.2, y: 1.0, w: 4.5, h: 1.2, fill: "FFFFFF", line: "CCCCCC" });
+        slide.addText("General Info", { x: 0.3, y: 1.1, fontSize: 11, bold: true, color: "003366" });
+        slide.addText(`Date: ${data['Date']}\nModel: ${data['Model']}\nLine: ${data['Line No']}`, 
+            { x: 0.3, y: 1.4, fontSize: 10, color: "333333" });
 
-        // 2. Defect Breakdown
-        slide.addText("Defect Breakdown", { x: 0.5, y: 2.3, fontSize: 12, color: "002d72", bold: true });
-        let defectText = `Function: ${data['Func Details']} (${data['Func Qty']})\n` +
-                         `Aesthetic: ${data['Aes Details']} (${data['Aes Qty']})\n` +
-                         `Packing: ${data['Pack Details']} (${data['Pack Qty']})`;
-        slide.addText(defectText, { x: 0.5, y: 2.5, w: 9, h: 1.0, fontSize: 11, color: "333333", shape: pres.ShapeType.rect, fill: "FFFFFF", line: "DDDDDD" });
+        // Box 2: Metrics
+        slide.addShape(pres.ShapeType.rect, { x: 4.8, y: 1.0, w: 4.5, h: 1.2, fill: "FFFFFF", line: "CCCCCC" });
+        slide.addText("Metrics", { x: 4.9, y: 1.1, fontSize: 11, bold: true, color: "003366" });
+        slide.addText(`Lot: ${data['Lot Qty']} | Sample: ${data['Sample Qty']}`, { x: 4.9, y: 1.4, fontSize: 10 });
+        slide.addText(`Defects: ${data['Total Defect']}`, { x: 4.9, y: 1.7, fontSize: 12, bold: true, color: "D32F2F" });
+        slide.addText(`SRR: ${data['SRR'] || data['SRR %']}`, { x: 7.0, y: 1.7, fontSize: 12, bold: true, color: "003366" });
 
-        // 3. Traceability & Action Plan
-        slide.addText("Traceability & Action Plan", { x: 0.5, y: 3.7, fontSize: 12, color: "002d72", bold: true });
-        let traceText = `MC Date: ${data['MC Date']}  |  LQC: ${data['LQC Name']}  |  FT: ${data['FT Name']}`;
-        slide.addText(traceText, { x: 0.5, y: 3.9, w: 9, fontSize: 10, italic: true, color: "666666" });
+        // --- SECTION 2: DEFECTS & TRACEABILITY (Middle) ---
+        // Box 3: Defects
+        slide.addShape(pres.ShapeType.rect, { x: 0.2, y: 2.4, w: 9.1, h: 1.5, fill: "FFFFFF", line: "CCCCCC" });
+        slide.addText("Defect Breakdown", { x: 0.3, y: 2.5, fontSize: 11, bold: true, color: "003366" });
+        let defText = `Func (${data['Func Qty']}): ${data['Func Details']}\n` +
+                      `Aes (${data['Aes Qty']}): ${data['Aes Details']}\n` +
+                      `Pack (${data['Pack Qty']}): ${data['Pack Details']}`;
+        slide.addText(defText, { x: 0.3, y: 2.8, w: 8.8, fontSize: 10, color: "333333" });
 
-        let capTable = [
-            [{ text: "Problem", bold:true }, data['Problem']],
-            [{ text: "Root Cause", bold:true }, data['Root Cause']],
-            [{ text: "Corrective Action", bold:true }, data['Corrective']],
-            [{ text: "Preventive", bold:true }, data['Preventive']]
-        ];
-        slide.addTable(capTable, { x: 0.5, y: 4.2, w: 6, colW: [1.5, 4.5], fontSize: 10, border: { color: "AAAAAA" } });
+        // Box 4: Traceability (Full Details)
+        slide.addShape(pres.ShapeType.rect, { x: 0.2, y: 4.0, w: 9.1, h: 1.0, fill: "FFFFFF", line: "CCCCCC" });
+        slide.addText("Traceability", { x: 0.3, y: 4.1, fontSize: 11, bold: true, color: "003366" });
+        
+        let trace1 = `MC Date: ${data['MC Date']} | Belongs To: ${data['Belongs To']}`;
+        let trace2 = `LQC: ${data['LQC Date']} (${data['LQC Name']}) | FT: ${data['FT Date']} (${data['FT Name']})`;
+        let trace3 = `Attempts - BT: ${data['BT Attempt']} | RF: ${data['RF Attempt']}`;
+        
+        slide.addText(`${trace1}\n${trace2}\n${trace3}`, { x: 0.3, y: 4.3, w: 8.8, fontSize: 9, color: "555555" });
 
-        // 4. Evidence Images (Right Side)
-        if (images && images.length > 0) {
-            slide.addText("Evidence", { x: 6.8, y: 3.7, fontSize: 11, bold: true });
-            // Add up to 2 images stacked
-            if(images[0]) slide.addImage({ data: images[0], x: 6.8, y: 4.0, w: 2.5, h: 1.5 });
-            if(images[1]) slide.addImage({ data: images[1], x: 6.8, y: 5.6, w: 2.5, h: 1.5 }); // Might overlap bottom line, adjust if needed
+        // --- SECTION 3: ACTION PLAN (Bottom) ---
+        slide.addShape(pres.ShapeType.rect, { x: 0.2, y: 5.2, w: 6.0, h: 1.8, fill: "FFFFFF", line: "CCCCCC" });
+        slide.addText("Action Plan", { x: 0.3, y: 5.3, fontSize: 11, bold: true, color: "D32F2F" });
+        
+        slide.addText("Problem:", { x: 0.3, y: 5.6, fontSize: 9, bold: true });
+        slide.addText(data['Problem'], { x: 1.5, y: 5.6, w: 4.5, fontSize: 9 });
+
+        slide.addText("Root Cause:", { x: 0.3, y: 6.0, fontSize: 9, bold: true });
+        slide.addText(data['Root Cause'], { x: 1.5, y: 6.0, w: 4.5, fontSize: 9 });
+
+        slide.addText("Corrective:", { x: 0.3, y: 6.4, fontSize: 9, bold: true });
+        slide.addText(data['Corrective'], { x: 1.5, y: 6.4, w: 4.5, fontSize: 9 });
+
+        // --- SECTION 4: IMAGES (Bottom Right) ---
+        if(imgs && imgs.length > 0) {
+            slide.addText("Evidence", { x: 6.4, y: 5.3, fontSize: 11, bold: true, color: "003366" });
+            slide.addImage({ data: imgs[0], x: 6.4, y: 5.5, w: 2.8, h: 1.5 });
         }
 
-        pres.writeFile({ fileName: `PDI_${data['Model']}_${data['Date']}.pptx` });
+        pres.writeFile({ fileName: `PDI_${data['Model']}.pptx` });
     }
 </script>
 
