@@ -11,33 +11,22 @@
     
     <style>
         body { background-color: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
-        
-        /* Navbar & Logo */
         .navbar { background: white; border-bottom: 4px solid #003366; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .logo-img { height: 55px; object-fit: contain; } /* Controls Logo Size */
-
-        /* Cards */
+        .logo-img { height: 55px; object-fit: contain; }
         .card { border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .card-header { font-weight: 700; color: #003366; background: #fff; border-bottom: 2px solid #eee; }
-        
-        /* Form Elements */
         .form-label { font-size: 13px; font-weight: 600; color: #555; }
         .form-control, .form-select { font-size: 14px; border: 1px solid #ccc; }
         .form-control:focus { border-color: #003366; box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1); }
-        
-        /* Preview Modal */
         .preview-label { font-weight: bold; color: #003366; width: 40%; }
-        .preview-val { color: #333; }
         .trace-box { background: #eef2f7; padding: 10px; border-radius: 5px; margin-bottom: 10px; font-size: 13px; }
     </style>
 </head>
 <body>
 
-<!-- Navbar -->
 <nav class="navbar fixed-top">
     <div class="container-fluid px-5">
         <div class="d-flex align-items-center gap-3">
-            <!-- LOGO: Ensure file is named logo.png in GitHub -->
             <img src="logo.png" id="mainLogo" class="logo-img" alt="CALIFONIX" onerror="this.style.display='none'; document.getElementById('logoText').style.display='block'">
             <h3 id="logoText" style="display:none; color:#003366; font-weight:bold;">CALIFONIX</h3>
         </div>
@@ -57,7 +46,6 @@
                 <input type="hidden" name="action" id="formAction" value="save">
                 <input type="hidden" name="editRowId" id="editRowId">
 
-                <!-- 1. General Info -->
                 <div class="card">
                     <div class="card-header">General Information</div>
                     <div class="card-body">
@@ -74,7 +62,6 @@
                     </div>
                 </div>
 
-                <!-- 2. Defects -->
                 <div class="card">
                     <div class="card-header text-danger">Defect Breakdown</div>
                     <div class="card-body">
@@ -96,7 +83,6 @@
                     </div>
                 </div>
 
-                <!-- 3. Traceability (Full Details) -->
                 <div class="card">
                     <div class="card-header text-success">Traceability & Process</div>
                     <div class="card-body">
@@ -105,33 +91,12 @@
                             <div class="col-md-3"><label class="form-label">Defect Belongs To</label><select name="Belongs To" class="form-select"><option>Buds</option><option>Case</option></select></div>
                             <div class="col-md-3"><label class="form-label">BT Attempt</label><select name="BT Attempt" class="form-select"><option>Yes</option><option>No</option></select></div>
                             <div class="col-md-3"><label class="form-label">RF Attempt</label><select name="RF Attempt" class="form-select"><option>Yes</option><option>No</option></select></div>
-                            
-                            <!-- LQC Block -->
-                            <div class="col-md-6">
-                                <div class="border p-2 rounded bg-light">
-                                    <h6 class="text-primary small fw-bold">LQC Check</h6>
-                                    <div class="row g-2">
-                                        <div class="col-7"><input type="datetime-local" name="LQC Date" class="form-control form-control-sm"></div>
-                                        <div class="col-5"><input type="text" name="LQC Name" class="form-control form-control-sm" placeholder="Operator Name"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- FT Block -->
-                            <div class="col-md-6">
-                                <div class="border p-2 rounded bg-light">
-                                    <h6 class="text-primary small fw-bold">FT Check</h6>
-                                    <div class="row g-2">
-                                        <div class="col-7"><input type="datetime-local" name="FT Date" class="form-control form-control-sm"></div>
-                                        <div class="col-5"><input type="text" name="FT Name" class="form-control form-control-sm" placeholder="Operator Name"></div>
-                                    </div>
-                                </div>
-                            </div>
+                            <div class="col-md-6"><div class="border p-2 rounded bg-light"><h6 class="text-primary small fw-bold">LQC Check</h6><div class="row g-2"><div class="col-7"><input type="datetime-local" name="LQC Date" class="form-control form-control-sm"></div><div class="col-5"><input type="text" name="LQC Name" class="form-control form-control-sm" placeholder="Operator Name"></div></div></div></div>
+                            <div class="col-md-6"><div class="border p-2 rounded bg-light"><h6 class="text-primary small fw-bold">FT Check</h6><div class="row g-2"><div class="col-7"><input type="datetime-local" name="FT Date" class="form-control form-control-sm"></div><div class="col-5"><input type="text" name="FT Name" class="form-control form-control-sm" placeholder="Operator Name"></div></div></div></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 4. Action Plan -->
                 <div class="card border-danger">
                     <div class="card-header bg-danger text-white">Action Plan & Evidence</div>
                     <div class="card-body">
@@ -152,7 +117,6 @@
                     </div>
                 </div>
 
-                <!-- Buttons -->
                 <div class="d-flex justify-content-end gap-3 my-4">
                     <button type="button" class="btn btn-secondary" onclick="resetForm()">Clear</button>
                     <button type="button" class="btn btn-dark" onclick="showFullPreview()">Preview Data</button>
@@ -173,16 +137,13 @@
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover text-center align-middle">
                         <thead class="table-dark">
-                            <tr>
-                                <th>Date</th><th>Model</th><th>Line</th><th>Total Defect</th><th>Problem</th><th>Actions</th>
-                            </tr>
+                            <tr><th>Date</th><th>Model</th><th>Line</th><th>Total Defect</th><th>Problem</th><th>Actions</th></tr>
                         </thead>
                         <tbody id="dashData"></tbody>
                     </table>
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 
@@ -190,40 +151,28 @@
 <div class="modal fade" id="previewModal" tabindex="-1">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Inspection Summary Preview</h5>
-                <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="previewContent">
-                <!-- Injected via JS -->
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-danger" onclick="downloadPPT()">Download Professional PPT</button>
-            </div>
+            <div class="modal-header bg-primary text-white"><h5 class="modal-title">Summary Preview</h5><button class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body" id="previewContent"></div>
+            <div class="modal-footer"><button class="btn btn-danger" onclick="downloadPPT()">Download PPT</button></div>
         </div>
     </div>
 </div>
 
 <script>
-    // --- CHANGE THIS URL TO YOUR DEPLOYED SCRIPT URL ---
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxM5JZ5_7fw5QOo3n8L7rfTU_7qfC8PSWYPCy0jGeCYZUUHwNzJmYUhlwYIsg1SRA/exec';
+    // --- REPLACE THIS WITH YOUR NEW URL ---
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz6voWBrmtTiETIB9JkTG_gas3amEHRN6xOIi-Qkxj1E4CFOsvvSLLgw0FShqqiIuVB/exec';
 
-    let evidenceImg = null; // Stores Base64 of Evidence
-    let logoImg = null;     // Stores Base64 of Logo
+    let evidenceImg = null;
+    let logoImg = null;
 
-    // 1. Load Logo Automatically
     window.onload = function() {
-        fetch('logo.png')
-        .then(res => res.blob())
-        .then(blob => {
+        fetch('logo.png').then(res => res.blob()).then(blob => {
             const reader = new FileReader();
             reader.onloadend = () => { logoImg = reader.result; };
             reader.readAsDataURL(blob);
-        })
-        .catch(() => console.log("Logo.png not found in repo"));
+        }).catch(() => console.log("Logo.png not found"));
     };
 
-    // 2. Evidence Image
     function handleEvidence() {
         const file = document.getElementById('evidenceInput').files[0];
         if (file) {
@@ -236,17 +185,14 @@
         }
     }
 
-    // 3. Calculation
     function calc() {
-        const f = Number(document.getElementById('fQty').value) || 0;
-        const a = Number(document.getElementById('aQty').value) || 0;
-        const p = Number(document.getElementById('pQty').value) || 0;
-        const s = Number(document.getElementById('sampleQty').value) || 0;
-        
-        const t = f + a + p;
+        const f = Number(document.getElementById('fQty').value)||0;
+        const a = Number(document.getElementById('aQty').value)||0;
+        const p = Number(document.getElementById('pQty').value)||0;
+        const s = Number(document.getElementById('sampleQty').value)||0;
+        const t = f+a+p;
         document.getElementById('totalDefect').value = t;
-        document.getElementById('srrRate').value = s > 0 ? ((t/s)*100).toFixed(2) + '%' : '0%';
-
+        document.getElementById('srrRate').value = s>0 ? ((t/s)*100).toFixed(2)+'%' : '0%';
         let prob = "No Major Issues";
         if(f>0) prob = `Func: ${document.getElementById('fDet').value} (${f})`;
         else if(a>0) prob = `Aes: ${document.getElementById('aDet').value} (${a})`;
@@ -254,7 +200,6 @@
         document.getElementById('problemDesc').value = prob;
     }
 
-    // 4. Save
     document.getElementById('pdiForm').addEventListener('submit', e => {
         e.preventDefault();
         const btn = document.getElementById('saveBtn');
@@ -273,13 +218,11 @@
         evidenceImg = null;
     }
 
-    // 5. Dashboard
     function loadDashboard() {
         const tbody = document.getElementById('dashData');
         tbody.innerHTML = '<tr><td colspan="6">Loading...</td></tr>';
         const start = document.getElementById('filterStart').value;
         const end = document.getElementById('filterEnd').value;
-
         fetch(SCRIPT_URL).then(r=>r.json()).then(json => {
             tbody.innerHTML = '';
             const rows = json.data.filter(r => (!start || r[1] >= start) && (!end || r[1] <= end));
@@ -289,11 +232,10 @@
                 tbody.innerHTML += `
                     <tr>
                         <td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td>
-                        <td class="text-danger fw-bold">${r[7]}</td>
-                        <td class="small text-start">${r[24]}</td>
+                        <td class="text-danger fw-bold">${r[7]}</td><td class="small text-start">${r[24]}</td>
                         <td>
                             <button class="btn btn-sm btn-warning" onclick="editRec('${rowStr}')">Edit</button>
-                            <button class="btn btn-sm btn-danger" onclick="delRec(${r[0]})">Del</button>
+                            <button class="btn btn-sm btn-danger" onclick="delRec('${r[0]}')">Del</button>
                             <button class="btn btn-sm btn-success" onclick="pptRec('${rowStr}')">PPT</button>
                         </td>
                     </tr>`;
@@ -307,15 +249,13 @@
         const f = document.getElementById('pdiForm').elements;
         document.getElementById('formAction').value = 'edit';
         document.getElementById('editRowId').value = r[0];
-        // Populate
         f['Date'].value=r[1]; f['Model'].value=r[2]; f['Line No'].value=r[3];
         f['Colour'].value=r[4]; f['Lot Qty'].value=r[5]; f['Sample Qty'].value=r[6];
         f['Total Defect'].value=r[7]; f['SRR'].value=r[8];
         f['Func Details'].value=r[9]; f['Func Qty'].value=r[10];
         f['Aes Details'].value=r[11]; f['Aes Qty'].value=r[12];
         f['Pack Details'].value=r[13]; f['Pack Qty'].value=r[14];
-        f['MC Date'].value=r[15]; 
-        f['LQC Date'].value=r[16]; f['LQC Name'].value=r[17];
+        f['MC Date'].value=r[15]; f['LQC Date'].value=r[16]; f['LQC Name'].value=r[17];
         f['FT Date'].value=r[18]; f['FT Name'].value=r[19];
         f['Belongs To'].value=r[20]; f['BT Attempt'].value=r[21]; f['RF Attempt'].value=r[22];
         f['Team'].value=r[23]; f['Problem'].value=r[24]; f['Root Cause'].value=r[25];
@@ -323,59 +263,29 @@
     }
 
     function delRec(id) {
-        if(confirm("Delete?")) {
-            const fd = new FormData(); fd.append('action','delete'); fd.append('rowIndex',id);
-            fetch(SCRIPT_URL,{method:'POST',body:fd}).then(()=>loadDashboard());
+        if(confirm("Are you sure you want to delete this record?")) {
+            const fd = new FormData(); fd.append('action','delete'); fd.append('rowIndex', id);
+            fetch(SCRIPT_URL,{method:'POST',body:fd})
+            .then(res=>res.json())
+            .then(d=>{ alert(d.message); loadDashboard(); })
+            .catch(e=>alert("Deletion failed"));
         }
     }
 
-    // 6. Preview (Full Details)
     function showFullPreview() {
         const fd = new FormData(document.getElementById('pdiForm'));
         const html = `
             <div class="row">
-                <div class="col-md-6">
-                    <h6 class="text-primary border-bottom">General Info</h6>
-                    <table class="table table-sm">
-                        <tr><td>Date: ${fd.get('Date')}</td><td>Model: ${fd.get('Model')}</td></tr>
-                        <tr><td>Line: ${fd.get('Line No')}</td><td>Color: ${fd.get('Colour')}</td></tr>
-                        <tr><td>Lot: ${fd.get('Lot Qty')}</td><td>Sample: ${fd.get('Sample Qty')}</td></tr>
-                        <tr><td class="text-danger fw-bold">Defects: ${fd.get('Total Defect')}</td><td>SRR: ${fd.get('SRR')}</td></tr>
-                    </table>
-                </div>
-                <div class="col-md-6">
-                    <h6 class="text-primary border-bottom">Traceability</h6>
-                    <div class="trace-box">
-                        <div><strong>MC Date:</strong> ${fd.get('MC Date')}</div>
-                        <div><strong>LQC:</strong> ${fd.get('LQC Date')} (${fd.get('LQC Name')})</div>
-                        <div><strong>FT:</strong> ${fd.get('FT Date')} (${fd.get('FT Name')})</div>
-                        <div><strong>Attempts:</strong> BT: ${fd.get('BT Attempt')} / RF: ${fd.get('RF Attempt')}</div>
-                    </div>
-                </div>
-                <div class="col-12">
-                    <h6 class="text-danger border-bottom">Defects</h6>
-                    <ul>
-                        <li>F: ${fd.get('Func Details')} (${fd.get('Func Qty')})</li>
-                        <li>A: ${fd.get('Aes Details')} (${fd.get('Aes Qty')})</li>
-                        <li>P: ${fd.get('Pack Details')} (${fd.get('Pack Qty')})</li>
-                    </ul>
-                </div>
-                <div class="col-12">
-                    <h6 class="text-success border-bottom">Action Plan</h6>
-                    <p><strong>Prob:</strong> ${fd.get('Problem')}</p>
-                    <p><strong>RC:</strong> ${fd.get('Root Cause')}</p>
-                    <p><strong>CA:</strong> ${fd.get('Corrective')}</p>
-                </div>
-                <div class="col-12 text-center">
-                    ${evidenceImg ? `<img src="${evidenceImg}" style="height:150px; border:1px solid #ccc">` : ''}
-                </div>
-            </div>
-        `;
+                <div class="col-md-6"><h6 class="text-primary border-bottom">General</h6><table class="table table-sm"><tr><td>Date: ${fd.get('Date')}</td><td>Model: ${fd.get('Model')}</td></tr><tr><td>Line: ${fd.get('Line No')}</td><td>Color: ${fd.get('Colour')}</td></tr><tr><td>Lot: ${fd.get('Lot Qty')}</td><td>Sample: ${fd.get('Sample Qty')}</td></tr><tr><td class="text-danger fw-bold">Defects: ${fd.get('Total Defect')}</td><td>SRR: ${fd.get('SRR')}</td></tr></table></div>
+                <div class="col-md-6"><h6 class="text-primary border-bottom">Traceability</h6><div class="trace-box"><div><strong>MC:</strong> ${fd.get('MC Date')}</div><div><strong>LQC:</strong> ${fd.get('LQC Date')} (${fd.get('LQC Name')})</div><div><strong>FT:</strong> ${fd.get('FT Date')} (${fd.get('FT Name')})</div><div><strong>Attempts:</strong> BT: ${fd.get('BT Attempt')} / RF: ${fd.get('RF Attempt')}</div></div></div>
+                <div class="col-12"><h6 class="text-danger border-bottom">Defects</h6><ul><li>F: ${fd.get('Func Details')} (${fd.get('Func Qty')})</li><li>A: ${fd.get('Aes Details')} (${fd.get('Aes Qty')})</li><li>P: ${fd.get('Pack Details')} (${fd.get('Pack Qty')})</li></ul></div>
+                <div class="col-12"><h6 class="text-success border-bottom">Action Plan</h6><p><strong>Prob:</strong> ${fd.get('Problem')}</p><p><strong>RC:</strong> ${fd.get('Root Cause')}</p><p><strong>CA:</strong> ${fd.get('Corrective')}</p></div>
+                <div class="col-12 text-center">${evidenceImg ? `<img src="${evidenceImg}" style="height:150px; border:1px solid #ccc">` : ''}</div>
+            </div>`;
         document.getElementById('previewContent').innerHTML = html;
         new bootstrap.Modal(document.getElementById('previewModal')).show();
     }
 
-    // 7. Professional PPT (Table Layout)
     function downloadPPT() {
         const fd = new FormData(document.getElementById('pdiForm'));
         const d = {}; fd.forEach((v,k)=>d[k]=v);
@@ -384,13 +294,10 @@
 
     function pptRec(str) {
         const r = JSON.parse(decodeURIComponent(str));
-        // Manual Map
         const d = {
             'Date':r[1], 'Model':r[2], 'Line No':r[3], 'Lot Qty':r[5], 'Sample Qty':r[6],
-            'Total Defect':r[7], 'SRR':r[8],
-            'Func Details':r[9], 'Func Qty':r[10], 'Aes Details':r[11], 'Aes Qty':r[12], 'Pack Details':r[13], 'Pack Qty':r[14],
-            'MC Date':r[15], 'LQC Date':r[16], 'LQC Name':r[17], 'FT Date':r[18], 'FT Name':r[19],
-            'Belongs To':r[20], 'BT Attempt':r[21], 'RF Attempt':r[22],
+            'Total Defect':r[7], 'SRR':r[8], 'Func Details':r[9], 'Func Qty':r[10], 'Aes Details':r[11], 'Aes Qty':r[12], 'Pack Details':r[13], 'Pack Qty':r[14],
+            'MC Date':r[15], 'LQC Date':r[16], 'LQC Name':r[17], 'FT Date':r[18], 'FT Name':r[19], 'Belongs To':r[20], 'BT Attempt':r[21], 'RF Attempt':r[22],
             'Problem':r[24], 'Root Cause':r[25], 'Corrective':r[26], 'Preventive':r[27]
         };
         generatePPT(d, null);
@@ -400,71 +307,38 @@
         let pres = new PptxGenJS();
         let slide = pres.addSlide();
         slide.background = { color: "FFFFFF" };
-
-        // 1. Header Bar (Blue)
         slide.addShape(pres.ShapeType.rect, { x: 0, y: 0, w: "100%", h: 0.8, fill: "003366" });
         slide.addText("PDI REVIEW REPORT", { x: 0.3, y: 0.15, fontSize: 24, color: "FFFFFF", bold: true });
-        
-        // Add Logo (if loaded)
         if(logoImg) slide.addImage({ data: logoImg, x: 8.5, y: 0.1, w: 1.2, h: 0.6 });
-
-        // 2. Info Grid (Top)
-        let headers = [
-            [{ text: "Model", options:{fill:"003366", color:"fff"} }, { text: "Date", options:{fill:"003366", color:"fff"} }, { text: "Line", options:{fill:"003366", color:"fff"} }]
-        ];
-        let values = [
-            [data['Model'], data['Date'], data['Line No']]
-        ];
+        
+        let headers = [[{ text: "Model", options:{fill:"003366", color:"fff"} }, { text: "Date", options:{fill:"003366", color:"fff"} }, { text: "Line", options:{fill:"003366", color:"fff"} }]];
+        let values = [[data['Model'], data['Date'], data['Line No']]];
         slide.addTable([...headers, ...values], { x: 0.3, y: 1.0, w: 9.4, align:"center", fontSize:11 });
 
-        // 3. Metrics Table
-        let metHead = [[
-            { text: "Lot Qty", options:{fill:"CCCCCC", bold:true} }, 
-            { text: "Sample Qty", options:{fill:"CCCCCC", bold:true} }, 
-            { text: "Defects", options:{fill:"CCCCCC", bold:true, color:"D32F2F"} }, 
-            { text: "SRR %", options:{fill:"CCCCCC", bold:true, color:"003366"} }
-        ]];
+        let metHead = [[{ text: "Lot Qty", options:{fill:"CCCCCC", bold:true} }, { text: "Sample Qty", options:{fill:"CCCCCC", bold:true} }, { text: "Defects", options:{fill:"CCCCCC", bold:true, color:"D32F2F"} }, { text: "SRR %", options:{fill:"CCCCCC", bold:true, color:"003366"} }]];
         let metVal = [[data['Lot Qty'], data['Sample Qty'], data['Total Defect'], data['SRR'] || data['SRR %']]];
         slide.addTable([...metHead, ...metVal], { x: 0.3, y: 1.8, w: 9.4, align:"center", fontSize:11 });
 
-        // 4. Traceability Table
         slide.addText("Traceability Data", { x: 0.3, y: 2.7, fontSize: 12, bold: true, color: "003366" });
         let traceRows = [
             [{ text: "MC Date", bold:true }, data['MC Date'], { text: "Belongs To", bold:true }, data['Belongs To']],
-            [{ text: "LQC Info", bold:true }, `${data['LQC Date'] || ''}\n(${data['LQC Name'] || ''})`, { text: "FT Info", bold:true }, `${data['FT Date'] || ''}\n(${data['FT Name'] || ''})`],
+            [{ text: "LQC Info", bold:true }, `${data['LQC Date'] || ''} (${data['LQC Name'] || ''})`, { text: "FT Info", bold:true }, `${data['FT Date'] || ''} (${data['FT Name'] || ''})`],
             [{ text: "Attempts", bold:true }, `BT: ${data['BT Attempt']} | RF: ${data['RF Attempt']}`, { text: "", options:{fill:"fff"} }, ""]
         ];
         slide.addTable(traceRows, { x: 0.3, y: 2.9, w: 9.4, fontSize: 10, border: { color: "999999" } });
 
-        // 5. Defects & Action Plan (Side by Side)
-        // Left: Defects
         slide.addText("Defect Breakdown", { x: 0.3, y: 4.4, fontSize: 12, bold: true, color: "D32F2F" });
-        let defRows = [
-            [{ text: "Function", bold:true }, `${data['Func Details']} (${data['Func Qty']})`],
-            [{ text: "Aesthetic", bold:true }, `${data['Aes Details']} (${data['Aes Qty']})`],
-            [{ text: "Packing", bold:true }, `${data['Pack Details']} (${data['Pack Qty']})`]
-        ];
+        let defRows = [[{ text: "Function", bold:true }, `${data['Func Details']} (${data['Func Qty']})`], [{ text: "Aesthetic", bold:true }, `${data['Aes Details']} (${data['Aes Qty']})`], [{ text: "Packing", bold:true }, `${data['Pack Details']} (${data['Pack Qty']})`]];
         slide.addTable(defRows, { x: 0.3, y: 4.6, w: 4.5, fontSize: 10, border: { color: "999999" } });
 
-        // Right: Action Plan
         slide.addText("Action Plan (CAPA)", { x: 5.0, y: 4.4, fontSize: 12, bold: true, color: "003366" });
-        let capRows = [
-            [{ text: "Problem", bold:true }, data['Problem']],
-            [{ text: "Root Cause", bold:true }, data['Root Cause']],
-            [{ text: "Corrective", bold:true }, data['Corrective']]
-        ];
+        let capRows = [[{ text: "Problem", bold:true }, data['Problem']], [{ text: "Root Cause", bold:true }, data['Root Cause']], [{ text: "Corrective", bold:true }, data['Corrective']]];
         slide.addTable(capRows, { x: 5.0, y: 4.6, w: 4.7, colW:[1.2, 3.5], fontSize: 9, border: { color: "999999" } });
 
-        // 6. Evidence Image (Bottom Right Overlay or specific box)
-        if(img) {
-            // Add a small box for image
-            slide.addImage({ data: img, x: 8.0, y: 5.8, w: 1.5, h: 1.0 });
-        }
-
+        if(img) slide.addImage({ data: img, x: 8.0, y: 5.8, w: 1.5, h: 1.0 });
         pres.writeFile({ fileName: `PDI_Report_${data['Model']}.pptx` });
     }
 </script>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
