@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDI Performance Dashboard</title>
-    <!-- Bootstrap CSS for styling -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Libraries for PPT and Excel Export -->
     <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     
@@ -14,13 +12,21 @@
         body { background-color: #f4f6f9; padding: 20px; }
         .card { margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .section-title { background-color: #007bff; color: white; padding: 10px; border-radius: 5px 5px 0 0; }
-        .hidden { display: none; }
+        .logo-preview { max-height: 80px; margin-bottom: 10px; display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2 class="text-center mb-4">PDI Performance Dashboard</h2>
+    <div class="text-center mb-4">
+        <!-- Logo Upload Section -->
+        <img id="displayLogo" class="logo-preview mx-auto">
+        <h2 class="mt-2">PDI Performance Dashboard</h2>
+        <div class="mb-3 w-50 mx-auto">
+            <label class="form-label text-muted small">Upload Company Logo (for PPT & Preview)</label>
+            <input type="file" id="logoInput" class="form-control form-control-sm" accept="image/*" onchange="handleLogoUpload()">
+        </div>
+    </div>
 
     <form id="pdiForm" name="submit-to-google-sheet">
         
@@ -100,12 +106,10 @@
             </div>
         </div>
 
-        <!-- 4. Major Defect Action Plan (Logic based) -->
+        <!-- 4. Major Defect Action Plan -->
         <div class="card border-danger">
             <div class="section-title bg-danger"><h5>Major Defect Action Plan</h5></div>
             <div class="card-body">
-                <p class="text-muted small">Problem Description is auto-selected based on priority: Function > Aesthetic > Packing.</p>
-                
                 <div class="mb-3">
                     <label>1. Team Formation</label>
                     <input type="text" name="Team Formation" class="form-control">
@@ -149,15 +153,39 @@
         <h5 class="modal-title">Preview Data</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body" id="previewContent">
-        <!-- Content inserted via JS -->
+      <div class="modal-body">
+        <div class="text-center mb-3">
+            <img id="previewLogoModal" style="max-height: 80px; display: none;">
+        </div>
+        <div id="previewContent"></div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-    // --- 1. Logic for Auto-filling Action Plan ---
+    // --- Global Variable for Logo ---
+    let logoBase64 = null;
+
+    // --- 1. Handle Logo Upload ---
+    function handleLogoUpload() {
+        const fileInput = document.getElementById('logoInput');
+        const file = fileInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                logoBase64 = e.target.result; // Save base64 string
+                
+                // Show logo on main page
+                const displayImg = document.getElementById('displayLogo');
+                displayImg.src = logoBase64;
+                displayImg.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // --- 2. Logic for Auto-filling Action Plan ---
     function checkPriority() {
         const funcQty = document.getElementById('funcQty').value;
         const aesQty = document.getElementById('aesQty').value;
@@ -169,7 +197,6 @@
 
         let problem = "No Major Defect";
 
-        // Logic: Function > Aesthetic > Packing
         if (funcQty && funcQty > 0) {
             problem = "FUNCTION DEFECT: " + funcDetail + " (Qty: " + funcQty + ")";
         } else if (aesQty && aesQty > 0) {
@@ -181,9 +208,9 @@
         document.getElementById('problemDesc').value = problem;
     }
 
-    // --- 2. Google Sheet Submission ---
-    // PASTE YOUR WEB APP URL INSIDE THE QUOTES BELOW
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbyY8j0UaiOfi9vfMM3STEqQ2kC3lioZ6n0Yrb_prS4oG9jIAOT0FHXr_QOOqVE_Rn8/exec'; 
+    // --- 3. Google Sheet Submission ---
+    // !!! REPLACE THIS URL WITH YOUR NEW WEB APP URL !!!
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxUi5cHC8awxTYjZNx3Q04zY3zf5AFi33POoZVS0izMs-GmR-sy3oUeG3gysDdhM_Y/exec'; 
     
     const form = document.forms['submit-to-google-sheet'];
 
@@ -197,29 +224,43 @@
         .then(response => {
             alert("Data Saved Successfully!");
             form.reset();
+            // Reset Logo
+            logoBase64 = null;
+            document.getElementById('displayLogo').style.display = 'none';
             btn.disabled = false;
             btn.innerText = "Save to Google Sheet";
         })
         .catch(error => {
             console.error('Error!', error.message);
-            alert("Error saving data. Check console.");
+            // Sometimes it saves but returns error due to CORS, check sheet
+            alert("Check Google Sheet. If data is there, ignore this error."); 
             btn.disabled = false;
         });
     });
 
-    // --- 3. Preview Logic ---
+    // --- 4. Preview Logic ---
     function previewData() {
         const formData = new FormData(form);
         let html = "<table class='table table-bordered'>";
         for (const [key, value] of formData) {
-            if(value) html += `<tr><th>${key}</th><td>${value}</td></tr>`;
+            if(value && key !== "Data") html += `<tr><th>${key}</th><td>${value}</td></tr>`;
         }
         html += "</table>";
+        
+        // Handle Logo in Preview
+        const imgModal = document.getElementById('previewLogoModal');
+        if(logoBase64) {
+            imgModal.src = logoBase64;
+            imgModal.style.display = 'inline-block';
+        } else {
+            imgModal.style.display = 'none';
+        }
+
         document.getElementById('previewContent').innerHTML = html;
         new bootstrap.Modal(document.getElementById('previewModal')).show();
     }
 
-    // --- 4. Excel Download ---
+    // --- 5. Excel Download ---
     function downloadExcel() {
         const formData = new FormData(form);
         const data = {};
@@ -231,37 +272,50 @@
         XLSX.writeFile(wb, "PDI_Report.xlsx");
     }
 
-    // --- 5. PPT Download ---
+    // --- 6. PPT Download (With Logo) ---
     function downloadPPT() {
         let pres = new PptxGenJS();
-        
-        // Slide 1: Title & General Info
         let slide1 = pres.addSlide();
-        slide1.addText("PDI Performance Report", { x: 1, y: 0.5, fontSize: 24, bold: true, color: '363636' });
+
+        // Add Logo to Slide if exists
+        if (logoBase64) {
+            slide1.addImage({ data: logoBase64, x: 0.5, y: 0.2, w: 1.5, h: 0.8 });
+        }
+
+        // Title
+        slide1.addText("PDI Performance Report", { x: 2.5, y: 0.5, fontSize: 24, bold: true, color: '363636' });
         
         const model = document.querySelector('[name="Model"]').value;
         const date = document.querySelector('[name="Date"]').value;
         const problem = document.getElementById('problemDesc').value;
         const rca = document.querySelector('[name="Root Cause"]').value;
         const capa = document.querySelector('[name="Corrective Action"]').value;
+        const team = document.querySelector('[name="Team Formation"]').value;
 
-        // Add Data to Slide
-        slide1.addText(`Date: ${date}`, { x: 0.5, y: 1.5, fontSize: 14 });
-        slide1.addText(`Model: ${model}`, { x: 4, y: 1.5, fontSize: 14 });
+        // General Info Box
+        slide1.addText(`Date: ${date}   |   Model: ${model}`, { x: 0.5, y: 1.3, fontSize: 14, color: '666666' });
         
-        slide1.addText("Problem Description:", { x: 0.5, y: 2.5, fontSize: 16, bold: true, color:'007bff' });
-        slide1.addText(problem, { x: 0.5, y: 3.0, w: 8, fontSize: 12 });
+        // Sections
+        let yPos = 2.0;
+        
+        slide1.addText("1. Team Formation:", { x: 0.5, y: yPos, fontSize: 14, bold: true, color:'007bff' });
+        slide1.addText(team || "N/A", { x: 0.5, y: yPos+0.3, w: 9, fontSize: 12 });
+        yPos += 1.0;
 
-        slide1.addText("Root Cause Analysis:", { x: 0.5, y: 4.0, fontSize: 16, bold: true, color:'007bff' });
-        slide1.addText(rca || "N/A", { x: 0.5, y: 4.5, w: 8, fontSize: 12 });
+        slide1.addText("2. Problem Description:", { x: 0.5, y: yPos, fontSize: 14, bold: true, color:'007bff' });
+        slide1.addText(problem, { x: 0.5, y: yPos+0.3, w: 9, fontSize: 12 });
+        yPos += 1.0;
 
-        slide1.addText("Corrective Action:", { x: 0.5, y: 5.5, fontSize: 16, bold: true, color:'007bff' });
-        slide1.addText(capa || "N/A", { x: 0.5, y: 6.0, w: 8, fontSize: 12 });
+        slide1.addText("3. Root Cause Analysis:", { x: 0.5, y: yPos, fontSize: 14, bold: true, color:'007bff' });
+        slide1.addText(rca || "N/A", { x: 0.5, y: yPos+0.3, w: 9, fontSize: 12 });
+        yPos += 1.0;
+
+        slide1.addText("4. Corrective Action:", { x: 0.5, y: yPos, fontSize: 14, bold: true, color:'007bff' });
+        slide1.addText(capa || "N/A", { x: 0.5, y: yPos+0.3, w: 9, fontSize: 12 });
 
         pres.writeFile({ fileName: `PDI_Report_${model}.pptx` });
     }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
