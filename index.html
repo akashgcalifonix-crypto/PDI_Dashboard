@@ -279,7 +279,7 @@
                 <div class="col-md-6"><h6 class="text-primary border-bottom">General</h6><table class="table table-sm"><tr><td>Date: ${fd.get('Date')}</td><td>Model: ${fd.get('Model')}</td></tr><tr><td>Line: ${fd.get('Line No')}</td><td>Color: ${fd.get('Colour')}</td></tr><tr><td>Lot: ${fd.get('Lot Qty')}</td><td>Sample: ${fd.get('Sample Qty')}</td></tr><tr><td class="text-danger fw-bold">Defects: ${fd.get('Total Defect')}</td><td>SRR: ${fd.get('SRR')}</td></tr></table></div>
                 <div class="col-md-6"><h6 class="text-primary border-bottom">Traceability</h6><div class="trace-box"><div><strong>MC:</strong> ${fd.get('MC Date')}</div><div><strong>LQC:</strong> ${fd.get('LQC Date')} (${fd.get('LQC Name')})</div><div><strong>FT:</strong> ${fd.get('FT Date')} (${fd.get('FT Name')})</div><div><strong>Attempts:</strong> BT: ${fd.get('BT Attempt')} / RF: ${fd.get('RF Attempt')}</div></div></div>
                 <div class="col-12"><h6 class="text-danger border-bottom">Defects</h6><ul><li>F: ${fd.get('Func Details')} (${fd.get('Func Qty')})</li><li>A: ${fd.get('Aes Details')} (${fd.get('Aes Qty')})</li><li>P: ${fd.get('Pack Details')} (${fd.get('Pack Qty')})</li></ul></div>
-                <div class="col-12"><h6 class="text-success border-bottom">Action Plan</h6><p><strong>Prob:</strong> ${fd.get('Problem')}</p><p><strong>RC:</strong> ${fd.get('Root Cause')}</p><p><strong>CA:</strong> ${fd.get('Corrective')}</p></div>
+                <div class="col-12"><h6 class="text-success border-bottom">Action Plan</h6><p><strong>Prob:</strong> ${fd.get('Problem')}</p><p><strong>RC:</strong> ${fd.get('Root Cause')}</p><p><strong>CA:</strong> ${fd.get('Corrective')}</p><p><strong>PA:</strong> ${fd.get('Preventive')}</p></div>
                 <div class="col-12 text-center">${evidenceImg ? `<img src="${evidenceImg}" style="height:150px; border:1px solid #ccc">` : ''}</div>
             </div>`;
         document.getElementById('previewContent').innerHTML = html;
@@ -342,4 +342,5 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
 
