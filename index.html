@@ -10,16 +10,42 @@
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     
     <style>
-        body { background-color: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
         .navbar { background: white; border-bottom: 4px solid #003366; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .logo-img { height: 55px; object-fit: contain; }
-        .card { border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .card-header { font-weight: 700; color: #003366; background: #fff; border-bottom: 2px solid #eee; }
+        .logo-img { height: 50px; object-fit: contain; }
+        
+        /* Card & Form Styles */
+        .card { border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; background: #fff; }
+        .card-header { font-weight: 700; color: #003366; background: #fff; border-bottom: 2px solid #eee; padding: 15px; }
         .form-label { font-size: 13px; font-weight: 600; color: #555; }
-        .form-control, .form-select { font-size: 14px; border: 1px solid #ccc; }
+        .form-control, .form-select { font-size: 14px; border: 1px solid #dcdcdc; border-radius: 4px; }
         .form-control:focus { border-color: #003366; box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1); }
-        .preview-label { font-weight: bold; color: #003366; width: 40%; }
-        .trace-box { background: #eef2f7; padding: 10px; border-radius: 5px; margin-bottom: 10px; font-size: 13px; }
+        
+        /* --- PROFESSIONAL PREVIEW STYLES --- */
+        .report-paper {
+            background: white;
+            padding: 30px;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            max-width: 100%;
+        }
+        .report-header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 3px solid #003366; padding-bottom: 15px; margin-bottom: 20px;
+        }
+        .report-title { color: #003366; font-size: 24px; font-weight: 800; text-transform: uppercase; margin: 0; }
+        .report-subtitle { color: #666; font-size: 12px; margin: 0; text-align: right; }
+        
+        .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+        .stat-box { background: #f8f9fa; border: 1px solid #eee; padding: 10px; text-align: center; border-radius: 4px; }
+        .stat-label { font-size: 11px; color: #777; text-transform: uppercase; font-weight: bold; }
+        .stat-value { font-size: 16px; font-weight: bold; color: #333; }
+        
+        .section-title { background: #003366; color: white; padding: 5px 10px; font-size: 14px; font-weight: bold; margin-bottom: 10px; border-radius: 3px; }
+        .detail-table td { padding: 6px; border-bottom: 1px solid #eee; font-size: 13px; }
+        .detail-label { font-weight: bold; color: #555; width: 35%; }
+        
+        .capa-box { background: #fff5f5; border-left: 4px solid #dc3545; padding: 10px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -27,8 +53,8 @@
 <nav class="navbar fixed-top">
     <div class="container-fluid px-5">
         <div class="d-flex align-items-center gap-3">
-            <img src="logo.png" id="mainLogo" class="logo-img" alt="CALIFONIX" onerror="this.style.display='none'; document.getElementById('logoText').style.display='block'">
-            <h3 id="logoText" style="display:none; color:#003366; font-weight:bold;">CALIFONIX</h3>
+            <img src="https://i.postimg.cc/5y7SN4xc/logo.png" id="navLogo" class="logo-img" alt="CALIFONIX">
+            <h4 style="color:#003366; font-weight:bold; margin:0;">PDI TRACKER</h4>
         </div>
         <div class="nav nav-pills">
             <button class="nav-link active rounded-pill px-4" id="tab-form" data-bs-toggle="pill" data-bs-target="#pills-form">New Entry</button>
@@ -46,72 +72,96 @@
                 <input type="hidden" name="action" id="formAction" value="save">
                 <input type="hidden" name="editRowId" id="editRowId">
 
-                <div class="card">
-                    <div class="card-header">General Information</div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-2"><label class="form-label">Date</label><input type="date" name="Date" class="form-control" required></div>
-                            <div class="col-md-3"><label class="form-label">Model</label><input type="text" name="Model" class="form-control" required></div>
-                            <div class="col-md-2"><label class="form-label">Line No</label><input type="text" name="Line No" class="form-control" required></div>
-                            <div class="col-md-2"><label class="form-label">Colour</label><input type="text" name="Colour" class="form-control"></div>
-                            <div class="col-md-2"><label class="form-label">Lot Qty</label><input type="number" name="Lot Qty" class="form-control"></div>
-                            <div class="col-md-2"><label class="form-label">Sample Qty</label><input type="number" name="Sample Qty" id="sampleQty" class="form-control" oninput="calc()"></div>
-                            <div class="col-md-2"><label class="form-label text-danger">Total Defect</label><input type="number" name="Total Defect" id="totalDefect" class="form-control fw-bold" readonly></div>
-                            <div class="col-md-2"><label class="form-label text-danger">SRR %</label><input type="text" name="SRR" id="srrRate" class="form-control fw-bold" readonly></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header text-danger">Defect Breakdown</div>
-                    <div class="card-body">
-                        <div class="row g-2 mb-2">
-                            <div class="col-md-2 fw-bold">Function</div>
-                            <div class="col-md-8"><input type="text" name="Func Details" id="fDet" class="form-control" placeholder="Detail..."></div>
-                            <div class="col-md-2"><input type="number" name="Func Qty" id="fQty" class="form-control" placeholder="Qty" oninput="calc()"></div>
-                        </div>
-                        <div class="row g-2 mb-2">
-                            <div class="col-md-2 fw-bold">Aesthetic</div>
-                            <div class="col-md-8"><input type="text" name="Aes Details" id="aDet" class="form-control" placeholder="Detail..."></div>
-                            <div class="col-md-2"><input type="number" name="Aes Qty" id="aQty" class="form-control" placeholder="Qty" oninput="calc()"></div>
-                        </div>
-                        <div class="row g-2">
-                            <div class="col-md-2 fw-bold">Packing</div>
-                            <div class="col-md-8"><input type="text" name="Pack Details" id="pDet" class="form-control" placeholder="Detail..."></div>
-                            <div class="col-md-2"><input type="number" name="Pack Qty" id="pQty" class="form-control" placeholder="Qty" oninput="calc()"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header text-success">Traceability & Process</div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-3"><label class="form-label">Master Carton Date</label><input type="datetime-local" name="MC Date" class="form-control"></div>
-                            <div class="col-md-3"><label class="form-label">Defect Belongs To</label><select name="Belongs To" class="form-select"><option>Buds</option><option>Case</option></select></div>
-                            <div class="col-md-3"><label class="form-label">BT Attempt</label><select name="BT Attempt" class="form-select"><option>Yes</option><option>No</option></select></div>
-                            <div class="col-md-3"><label class="form-label">RF Attempt</label><select name="RF Attempt" class="form-select"><option>Yes</option><option>No</option></select></div>
-                            <div class="col-md-6"><div class="border p-2 rounded bg-light"><h6 class="text-primary small fw-bold">LQC Check</h6><div class="row g-2"><div class="col-7"><input type="datetime-local" name="LQC Date" class="form-control form-control-sm"></div><div class="col-5"><input type="text" name="LQC Name" class="form-control form-control-sm" placeholder="Operator Name"></div></div></div></div>
-                            <div class="col-md-6"><div class="border p-2 rounded bg-light"><h6 class="text-primary small fw-bold">FT Check</h6><div class="row g-2"><div class="col-7"><input type="datetime-local" name="FT Date" class="form-control form-control-sm"></div><div class="col-5"><input type="text" name="FT Name" class="form-control form-control-sm" placeholder="Operator Name"></div></div></div></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card border-danger">
-                    <div class="card-header bg-danger text-white">Action Plan & Evidence</div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-8">
-                                <label class="form-label">Team Formation</label><input type="text" name="Team" class="form-control mb-2">
-                                <label class="form-label">Problem (Auto)</label><input type="text" name="Problem" id="problemDesc" class="form-control mb-2 bg-light fw-bold" readonly>
-                                <label class="form-label">Root Cause</label><textarea name="Root Cause" class="form-control mb-2" rows="2"></textarea>
-                                <label class="form-label">Corrective Action</label><textarea name="Corrective" class="form-control mb-2" rows="2"></textarea>
-                                <label class="form-label">Preventive Action</label><textarea name="Preventive" class="form-control" rows="1"></textarea>
+                <div class="row">
+                    <!-- Left Column: Data Entry -->
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-header"><i class="bi bi-info-circle-fill me-2"></i>Product Info</div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-3"><label class="form-label">Date</label><input type="date" name="Date" class="form-control" required></div>
+                                    <div class="col-md-3"><label class="form-label">Model</label><input type="text" name="Model" class="form-control" required></div>
+                                    <div class="col-md-3"><label class="form-label">Line No</label><input type="text" name="Line No" class="form-control" required></div>
+                                    <div class="col-md-3"><label class="form-label">Colour</label><input type="text" name="Colour" class="form-control"></div>
+                                    <div class="col-md-3"><label class="form-label">Lot Qty</label><input type="number" name="Lot Qty" class="form-control"></div>
+                                    <div class="col-md-3"><label class="form-label">Sample Qty</label><input type="number" name="Sample Qty" id="sampleQty" class="form-control" oninput="calc()"></div>
+                                    <div class="col-md-3"><label class="form-label text-danger">Defects</label><input type="number" name="Total Defect" id="totalDefect" class="form-control fw-bold" readonly></div>
+                                    <div class="col-md-3"><label class="form-label text-danger">SRR %</label><input type="text" name="SRR" id="srrRate" class="form-control fw-bold" readonly></div>
+                                </div>
                             </div>
-                            <div class="col-md-4 text-center border-start">
-                                <label class="form-label mb-2">Upload Evidence Image</label>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Defect Details</div>
+                            <div class="card-body">
+                                <div class="row g-2 mb-2 align-items-center">
+                                    <div class="col-md-2 fw-bold">Functional</div>
+                                    <div class="col-md-8"><input type="text" name="Func Details" id="fDet" class="form-control" placeholder="Description..."></div>
+                                    <div class="col-md-2"><input type="number" name="Func Qty" id="fQty" class="form-control" placeholder="Qty" oninput="calc()"></div>
+                                </div>
+                                <div class="row g-2 mb-2 align-items-center">
+                                    <div class="col-md-2 fw-bold">Aesthetic</div>
+                                    <div class="col-md-8"><input type="text" name="Aes Details" id="aDet" class="form-control" placeholder="Description..."></div>
+                                    <div class="col-md-2"><input type="number" name="Aes Qty" id="aQty" class="form-control" placeholder="Qty" oninput="calc()"></div>
+                                </div>
+                                <div class="row g-2 align-items-center">
+                                    <div class="col-md-2 fw-bold">Packing</div>
+                                    <div class="col-md-8"><input type="text" name="Pack Details" id="pDet" class="form-control" placeholder="Description..."></div>
+                                    <div class="col-md-2"><input type="number" name="Pack Qty" id="pQty" class="form-control" placeholder="Qty" oninput="calc()"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card border-danger">
+                            <div class="card-header bg-danger text-white"><i class="bi bi-shield-check me-2"></i>CAPA (Action Plan)</div>
+                            <div class="card-body">
+                                <label class="form-label">Problem Statement (Auto)</label>
+                                <input type="text" name="Problem" id="problemDesc" class="form-control mb-2 bg-light fw-bold" readonly>
+                                <div class="row g-2">
+                                    <div class="col-md-6"><label class="form-label">Root Cause</label><textarea name="Root Cause" class="form-control" rows="2"></textarea></div>
+                                    <div class="col-md-6"><label class="form-label">Corrective Action</label><textarea name="Corrective" class="form-control" rows="2"></textarea></div>
+                                    <div class="col-md-12"><label class="form-label">Preventive Action</label><textarea name="Preventive" class="form-control" rows="1"></textarea></div>
+                                </div>
+                                <div class="mt-2">
+                                    <label class="form-label">Team Formation</label><input type="text" name="Team" class="form-control form-control-sm">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Traceability & Evidence -->
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-header text-success"><i class="bi bi-qr-code me-2"></i>Traceability</div>
+                            <div class="card-body">
+                                <div class="mb-2"><label class="form-label">Master Carton Date</label><input type="datetime-local" name="MC Date" class="form-control"></div>
+                                <div class="mb-2"><label class="form-label">Defect Origin</label><select name="Belongs To" class="form-select"><option>Buds</option><option>Case</option></select></div>
+                                
+                                <div class="row g-2 mb-2">
+                                    <div class="col-6"><label class="form-label">BT Attempt</label><select name="BT Attempt" class="form-select"><option>Yes</option><option>No</option></select></div>
+                                    <div class="col-6"><label class="form-label">RF Attempt</label><select name="RF Attempt" class="form-select"><option>Yes</option><option>No</option></select></div>
+                                </div>
+
+                                <div class="bg-light p-2 border rounded mb-2">
+                                    <small class="fw-bold text-primary">LQC Check</small>
+                                    <input type="datetime-local" name="LQC Date" class="form-control form-control-sm mb-1">
+                                    <input type="text" name="LQC Name" class="form-control form-control-sm" placeholder="Operator Name">
+                                </div>
+                                <div class="bg-light p-2 border rounded">
+                                    <small class="fw-bold text-primary">FT Check</small>
+                                    <input type="datetime-local" name="FT Date" class="form-control form-control-sm mb-1">
+                                    <input type="text" name="FT Name" class="form-control form-control-sm" placeholder="Operator Name">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header"><i class="bi bi-image me-2"></i>Evidence</div>
+                            <div class="card-body text-center">
                                 <input type="file" id="evidenceInput" class="form-control mb-2" accept="image/*" onchange="handleEvidence()">
-                                <div id="evidencePreviewBox"></div>
+                                <div id="evidencePreviewBox" style="min-height:100px; background:#f9f9f9; display:flex; align-items:center; justify-content:center; border:1px dashed #ccc;">
+                                    <small class="text-muted">No Image Selected</small>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -119,8 +169,8 @@
 
                 <div class="d-flex justify-content-end gap-3 my-4">
                     <button type="button" class="btn btn-secondary" onclick="resetForm()">Clear</button>
-                    <button type="button" class="btn btn-dark" onclick="showFullPreview()">Preview Data</button>
-                    <button type="submit" class="btn btn-primary px-5" id="saveBtn">Save Record</button>
+                    <button type="button" class="btn btn-dark" onclick="showFullPreview()">📄 Generate Preview</button>
+                    <button type="submit" class="btn btn-primary px-5" id="saveBtn">💾 Save Record</button>
                 </div>
             </form>
         </div>
@@ -147,30 +197,43 @@
     </div>
 </div>
 
-<!-- PREVIEW MODAL -->
+<!-- PROFESSIONAL PREVIEW MODAL -->
 <div class="modal fade" id="previewModal" tabindex="-1">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white"><h5 class="modal-title">Summary Preview</h5><button class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
-            <div class="modal-body" id="previewContent"></div>
-            <div class="modal-footer"><button class="btn btn-danger" onclick="downloadPPT()">Download PPT</button></div>
+            <div class="modal-body" style="background:#525659; padding:20px;">
+                <div id="previewContent" class="report-paper mx-auto">
+                    <!-- Dynamic Content Loads Here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button class="btn btn-danger" onclick="downloadPPT()">⬇ Download PPT Presentation</button>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    // --- REPLACE THIS WITH YOUR NEW URL ---
+    // --- SETUP ---
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz6voWBrmtTiETIB9JkTG_gas3amEHRN6xOIi-Qkxj1E4CFOsvvSLLgw0FShqqiIuVB/exec';
-
+    const LOGO_URL = "https://i.postimg.cc/5y7SN4xc/logo.png";
+    
     let evidenceImg = null;
-    let logoImg = null;
+    let logoBase64 = null;
 
+    // Load Logo on Start for PPT
     window.onload = function() {
-        fetch('logo.png').then(res => res.blob()).then(blob => {
-            const reader = new FileReader();
-            reader.onloadend = () => { logoImg = reader.result; };
-            reader.readAsDataURL(blob);
-        }).catch(() => console.log("Logo.png not found"));
+        const img = new Image();
+        img.crossOrigin = "Anonymous";
+        img.src = LOGO_URL;
+        img.onload = function(){
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width; canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            logoBase64 = canvas.toDataURL("image/png");
+        };
     };
 
     function handleEvidence() {
@@ -179,7 +242,7 @@
             const reader = new FileReader();
             reader.onload = e => {
                 evidenceImg = e.target.result;
-                document.getElementById('evidencePreviewBox').innerHTML = `<img src="${evidenceImg}" style="height:100px; border:1px solid #ccc; margin-top:5px;">`;
+                document.getElementById('evidencePreviewBox').innerHTML = `<img src="${evidenceImg}" style="max-height:150px; max-width:100%; border-radius:4px;">`;
             };
             reader.readAsDataURL(file);
         }
@@ -200,6 +263,7 @@
         document.getElementById('problemDesc').value = prob;
     }
 
+    // --- FORM SUBMIT ---
     document.getElementById('pdiForm').addEventListener('submit', e => {
         e.preventDefault();
         const btn = document.getElementById('saveBtn');
@@ -214,10 +278,11 @@
         document.getElementById('pdiForm').reset();
         document.getElementById('formAction').value = 'save';
         document.getElementById('editRowId').value = '';
-        document.getElementById('evidencePreviewBox').innerHTML = '';
+        document.getElementById('evidencePreviewBox').innerHTML = '<small class="text-muted">No Image</small>';
         evidenceImg = null;
     }
 
+    // --- DASHBOARD ---
     function loadDashboard() {
         const tbody = document.getElementById('dashData');
         tbody.innerHTML = '<tr><td colspan="6">Loading...</td></tr>';
@@ -234,8 +299,8 @@
                         <td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td>
                         <td class="text-danger fw-bold">${r[7]}</td><td class="small text-start">${r[24]}</td>
                         <td>
-                            <button class="btn btn-sm btn-warning" onclick="editRec('${rowStr}')">Edit</button>
-                            <button class="btn btn-sm btn-danger" onclick="delRec('${r[0]}')">Del</button>
+                            <button class="btn btn-sm btn-warning" onclick="editRec('${rowStr}')"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-danger" onclick="delRec('${r[0]}')"><i class="bi bi-trash"></i></button>
                             <button class="btn btn-sm btn-success" onclick="pptRec('${rowStr}')">PPT</button>
                         </td>
                     </tr>`;
@@ -262,26 +327,75 @@
         f['Corrective'].value=r[26]; f['Preventive'].value=r[27];
     }
 
-    function delRec(id) {
-        if(confirm("Are you sure you want to delete this record?")) {
+    async function delRec(id) {
+        if(confirm("Delete record?")) {
             const fd = new FormData(); fd.append('action','delete'); fd.append('rowIndex', id);
-            fetch(SCRIPT_URL,{method:'POST',body:fd})
-            .then(res=>res.json())
-            .then(d=>{ alert(d.message); loadDashboard(); })
-            .catch(e=>alert("Deletion failed"));
+            await fetch(SCRIPT_URL,{method:'POST',body:fd});
+            loadDashboard();
         }
     }
 
+    // --- ATTRACTIVE PREVIEW FUNCTION ---
     function showFullPreview() {
         const fd = new FormData(document.getElementById('pdiForm'));
+        
         const html = `
+            <div class="report-header">
+                <img src="${LOGO_URL}" style="height:60px;">
+                <div>
+                    <h3 class="report-title">PDI Inspection Report</h3>
+                    <p class="report-subtitle">Generated: ${new Date().toLocaleDateString()}</p>
+                </div>
+            </div>
+
+            <div class="stat-grid">
+                <div class="stat-box"><div class="stat-label">Model</div><div class="stat-value text-primary">${fd.get('Model')}</div></div>
+                <div class="stat-box"><div class="stat-label">Date</div><div class="stat-value">${fd.get('Date')}</div></div>
+                <div class="stat-box"><div class="stat-label">Line No</div><div class="stat-value">${fd.get('Line No')}</div></div>
+                <div class="stat-box"><div class="stat-label">Color</div><div class="stat-value">${fd.get('Colour')}</div></div>
+            </div>
+
             <div class="row">
-                <div class="col-md-6"><h6 class="text-primary border-bottom">General</h6><table class="table table-sm"><tr><td>Date: ${fd.get('Date')}</td><td>Model: ${fd.get('Model')}</td></tr><tr><td>Line: ${fd.get('Line No')}</td><td>Color: ${fd.get('Colour')}</td></tr><tr><td>Lot: ${fd.get('Lot Qty')}</td><td>Sample: ${fd.get('Sample Qty')}</td></tr><tr><td class="text-danger fw-bold">Defects: ${fd.get('Total Defect')}</td><td>SRR: ${fd.get('SRR')}</td></tr></table></div>
-                <div class="col-md-6"><h6 class="text-primary border-bottom">Traceability</h6><div class="trace-box"><div><strong>MC:</strong> ${fd.get('MC Date')}</div><div><strong>LQC:</strong> ${fd.get('LQC Date')} (${fd.get('LQC Name')})</div><div><strong>FT:</strong> ${fd.get('FT Date')} (${fd.get('FT Name')})</div><div><strong>Attempts:</strong> BT: ${fd.get('BT Attempt')} / RF: ${fd.get('RF Attempt')}</div></div></div>
-                <div class="col-12"><h6 class="text-danger border-bottom">Defects</h6><ul><li>F: ${fd.get('Func Details')} (${fd.get('Func Qty')})</li><li>A: ${fd.get('Aes Details')} (${fd.get('Aes Qty')})</li><li>P: ${fd.get('Pack Details')} (${fd.get('Pack Qty')})</li></ul></div>
-                <div class="col-12"><h6 class="text-success border-bottom">Action Plan</h6><p><strong>Prob:</strong> ${fd.get('Problem')}</p><p><strong>RC:</strong> ${fd.get('Root Cause')}</p><p><strong>CA:</strong> ${fd.get('Corrective')}</p><p><strong>PA:</strong> ${fd.get('Preventive')}</p></div>
-                <div class="col-12 text-center">${evidenceImg ? `<img src="${evidenceImg}" style="height:150px; border:1px solid #ccc">` : ''}</div>
-            </div>`;
+                <div class="col-md-6">
+                     <div class="section-title">Production Data</div>
+                     <table class="table detail-table">
+                        <tr><td class="detail-label">Lot Qty</td><td>${fd.get('Lot Qty')}</td></tr>
+                        <tr><td class="detail-label">Sample Qty</td><td>${fd.get('Sample Qty')}</td></tr>
+                        <tr><td class="detail-label">Total Defects</td><td class="text-danger fw-bold">${fd.get('Total Defect')}</td></tr>
+                        <tr><td class="detail-label">SRR %</td><td class="text-danger fw-bold">${fd.get('SRR')}</td></tr>
+                     </table>
+
+                     <div class="section-title mt-3">Defect Breakdown</div>
+                     <table class="table detail-table">
+                        <tr><td class="detail-label">Functional</td><td>${fd.get('Func Details')} <span class="badge bg-secondary">${fd.get('Func Qty')}</span></td></tr>
+                        <tr><td class="detail-label">Aesthetic</td><td>${fd.get('Aes Details')} <span class="badge bg-secondary">${fd.get('Aes Qty')}</span></td></tr>
+                        <tr><td class="detail-label">Packing</td><td>${fd.get('Pack Details')} <span class="badge bg-secondary">${fd.get('Pack Qty')}</span></td></tr>
+                     </table>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="section-title">Traceability</div>
+                    <table class="table detail-table">
+                        <tr><td class="detail-label">MC Date</td><td>${fd.get('MC Date')}</td></tr>
+                        <tr><td class="detail-label">Origin</td><td>${fd.get('Belongs To')}</td></tr>
+                        <tr><td class="detail-label">LQC Info</td><td>${fd.get('LQC Date')} <br><small>(${fd.get('LQC Name')})</small></td></tr>
+                        <tr><td class="detail-label">FT Info</td><td>${fd.get('FT Date')} <br><small>(${fd.get('FT Name')})</small></td></tr>
+                        <tr><td class="detail-label">Attempts</td><td>BT: ${fd.get('BT Attempt')} / RF: ${fd.get('RF Attempt')}</td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section-title mt-3 bg-danger">CAPA & Analysis</div>
+            <div class="capa-box">
+                <strong>Problem:</strong> ${fd.get('Problem')}<br>
+                <strong>Root Cause:</strong> ${fd.get('Root Cause')}<br>
+                <strong>Corrective Action:</strong> ${fd.get('Corrective')}
+            </div>
+            
+            <div class="text-center mt-3">
+                ${evidenceImg ? `<img src="${evidenceImg}" style="max-height:200px; border:2px solid #ddd; padding:5px;">` : '<p class="text-muted">No visual evidence attached</p>'}
+            </div>
+        `;
         document.getElementById('previewContent').innerHTML = html;
         new bootstrap.Modal(document.getElementById('previewModal')).show();
     }
@@ -303,45 +417,81 @@
         generatePPT(d, null);
     }
 
+    // --- ATTRACTIVE PPT FUNCTION ---
     function generatePPT(data, img) {
         let pres = new PptxGenJS();
         let slide = pres.addSlide();
-        slide.background = { color: "FFFFFF" };
-        slide.addShape(pres.ShapeType.rect, { x: 0, y: 0, w: "100%", h: 0.8, fill: "003366" });
-        slide.addText("PDI REVIEW REPORT", { x: 0.3, y: 0.15, fontSize: 24, color: "FFFFFF", bold: true });
-        if(logoImg) slide.addImage({ data: logoImg, x: 8.5, y: 0.1, w: 1.2, h: 0.6 });
         
-        let headers = [[{ text: "Model", options:{fill:"003366", color:"fff"} }, { text: "Date", options:{fill:"003366", color:"fff"} }, { text: "Line", options:{fill:"003366", color:"fff"} }]];
-        let values = [[data['Model'], data['Date'], data['Line No']]];
-        slide.addTable([...headers, ...values], { x: 0.3, y: 1.0, w: 9.4, align:"center", fontSize:11 });
+        // 1. Header with Logo (Blue Theme)
+        slide.addShape(pres.ShapeType.rect, { x: 0, y: 0, w: "100%", h: 0.9, fill: "003366" });
+        slide.addText("PDI QUALITY REPORT", { x: 0.2, y: 0.25, fontSize: 24, color: "FFFFFF", bold: true, fontFace: "Arial" });
+        
+        // Add Logo (if loaded)
+        if(logoBase64) {
+            slide.addImage({ data: logoBase64, x: 8.8, y: 0.1, w: 1.0, h: 0.65 });
+        }
 
-        let metHead = [[{ text: "Lot Qty", options:{fill:"CCCCCC", bold:true} }, { text: "Sample Qty", options:{fill:"CCCCCC", bold:true} }, { text: "Defects", options:{fill:"CCCCCC", bold:true, color:"D32F2F"} }, { text: "SRR %", options:{fill:"CCCCCC", bold:true, color:"003366"} }]];
-        let metVal = [[data['Lot Qty'], data['Sample Qty'], data['Total Defect'], data['SRR'] || data['SRR %']]];
-        slide.addTable([...metHead, ...metVal], { x: 0.3, y: 1.8, w: 9.4, align:"center", fontSize:11 });
+        // 2. Info Cards (Top Row)
+        let yStart = 1.1;
+        let cardW = 2.2;
+        
+        // Helper to draw a "Card"
+        const drawCard = (label, val, xPos) => {
+            slide.addShape(pres.ShapeType.rect, { x: xPos, y: yStart, w: cardW, h: 0.6, fill: "F0F4F8", line: {color:"CCCCCC"} });
+            slide.addText(label, { x: xPos, y: yStart+0.05, w: cardW, align:"center", fontSize:10, color:"666666" });
+            slide.addText(val, { x: xPos, y: yStart+0.3, w: cardW, align:"center", fontSize:14, bold:true, color:"003366" });
+        };
 
-        slide.addText("Traceability Data", { x: 0.3, y: 2.7, fontSize: 12, bold: true, color: "003366" });
-        let traceRows = [
-            [{ text: "MC Date", bold:true }, data['MC Date'], { text: "Belongs To", bold:true }, data['Belongs To']],
-            [{ text: "LQC Info", bold:true }, `${data['LQC Date'] || ''} (${data['LQC Name'] || ''})`, { text: "FT Info", bold:true }, `${data['FT Date'] || ''} (${data['FT Name'] || ''})`],
-            [{ text: "Attempts", bold:true }, `BT: ${data['BT Attempt']} | RF: ${data['RF Attempt']}`, { text: "", options:{fill:"fff"} }, ""]
+        drawCard("MODEL", data['Model'], 0.3);
+        drawCard("DATE", data['Date'], 2.7);
+        drawCard("LINE NO", data['Line No'], 5.1);
+        drawCard("TOTAL DEFECTS", data['Total Defect'], 7.5);
+
+        // 3. Main Data Tables (Split Left/Right)
+        
+        // LEFT: Breakdown
+        slide.addText("Defect Breakdown", { x: 0.3, y: 2.0, fontSize: 12, bold: true, color: "003366" });
+        let defRows = [
+            [{ text: "Functional", options:{fill:"eee"} }, data['Func Details'], data['Func Qty']],
+            [{ text: "Aesthetic", options:{fill:"eee"} }, data['Aes Details'], data['Aes Qty']],
+            [{ text: "Packing", options:{fill:"eee"} }, data['Pack Details'], data['Pack Qty']]
         ];
-        slide.addTable(traceRows, { x: 0.3, y: 2.9, w: 9.4, fontSize: 10, border: { color: "999999" } });
+        slide.addTable(defRows, { x: 0.3, y: 2.3, w: 4.5, fontSize: 10, border:{color:"999"}, colW:[1, 2.8, 0.7] });
 
-        slide.addText("Defect Breakdown", { x: 0.3, y: 4.4, fontSize: 12, bold: true, color: "D32F2F" });
-        let defRows = [[{ text: "Function", bold:true }, `${data['Func Details']} (${data['Func Qty']})`], [{ text: "Aesthetic", bold:true }, `${data['Aes Details']} (${data['Aes Qty']})`], [{ text: "Packing", bold:true }, `${data['Pack Details']} (${data['Pack Qty']})`]];
-        slide.addTable(defRows, { x: 0.3, y: 4.6, w: 4.5, fontSize: 10, border: { color: "999999" } });
+        // RIGHT: Traceability
+        slide.addText("Traceability Info", { x: 5.1, y: 2.0, fontSize: 12, bold: true, color: "003366" });
+        let traceRows = [
+            [{ text: "MC Date", bold:true }, data['MC Date']],
+            [{ text: "LQC Info", bold:true }, `${data['LQC Date'] || '-'} (${data['LQC Name']})`],
+            [{ text: "FT Info", bold:true }, `${data['FT Date'] || '-'} (${data['FT Name']})`],
+            [{ text: "Attempts", bold:true }, `BT: ${data['BT Attempt']}  |  RF: ${data['RF Attempt']}`]
+        ];
+        slide.addTable(traceRows, { x: 5.1, y: 2.3, w: 4.6, fontSize: 10, border:{color:"999"}, colW:[1.2, 3.4] });
 
-        slide.addText("Action Plan (CAPA)", { x: 5.0, y: 4.4, fontSize: 12, bold: true, color: "003366" });
-        let capRows = [[{ text: "Problem", bold:true }, data['Problem']], [{ text: "Root Cause", bold:true }, data['Root Cause']], [{ text: "Corrective", bold:true }, data['Corrective']],[{ text: "Preventive", bold:true }, data['Preventive']]];
-        slide.addTable(capRows, { x: 5.0, y: 4.6, w: 4.7, colW:[1.2, 3.5], fontSize: 9, border: { color: "999999" } });
+        // 4. CAPA Section (Bottom)
+        let capaY = 4.0;
+        slide.addShape(pres.ShapeType.rect, { x: 0.3, y: capaY, w: 9.4, h: 0.3, fill: "DC3545" });
+        slide.addText("Corrective & Preventive Action", { x: 0.3, y: capaY, w: 9.4, h: 0.3, align:"center", color:"FFF", bold:true, fontSize:11 });
 
-        if(img) slide.addImage({ data: img, x: 8.0, y: 5.8, w: 1.5, h: 1.0 });
-        pres.writeFile({ fileName: `PDI_Report_${data['Model']}.pptx` });
+        let capaTable = [
+            [{ text: "Problem", bold:true }, data['Problem']],
+            [{ text: "Root Cause", bold:true }, data['Root Cause']],
+            [{ text: "Corrective Action", bold:true }, data['Corrective']],
+            [{ text: "Preventive", bold:true }, data['Preventive']]
+        ];
+        slide.addTable(capaTable, { x: 0.3, y: capaY+0.3, w: 9.4, colW:[1.5, 7.9], fontSize: 10, border:{color:"CCC"} });
+
+        // 5. Evidence Image
+        if(img) {
+             slide.addImage({ data: img, x: 7.5, y: 4.4, w: 1.8, h: 1.2 }); // Overlay on right side of CAPA if space permits or separate
+        }
+        
+        // Footer
+        slide.addText("Confidential | Generated via Califonix System", { x: 0, y: 5.4, w: "100%", align:"center", fontSize:9, color:"999999" });
+
+        pres.writeFile({ fileName: `PDI_Report_${data['Model']}_${data['Date']}.pptx` });
     }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-
-
