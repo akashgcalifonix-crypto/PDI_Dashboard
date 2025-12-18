@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Califonix PDI Report</title>
+    <title>Califonix PDI Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     
     <style>
         body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
@@ -19,46 +20,18 @@
         .form-control, .form-select { font-size: 14px; border: 1px solid #dcdcdc; border-radius: 4px; }
         .form-control:focus { border-color: #003366; box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1); }
         
-        /* --- EXACT PREVIEW STYLES (MATCHING SCREENSHOT) --- */
+        /* --- PREVIEW STYLES --- */
         .report-paper { background: white; padding: 40px; border: 1px solid #ddd; width: 100%; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
-        .report-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #003366; padding-bottom: 10px; margin-bottom: 20px; }
-        .report-title { color: #003366; font-size: 24px; font-weight: 900; text-transform: uppercase; margin: 0; }
-        .report-meta { font-size: 12px; color: #666; text-align: right; }
-
-        /* Info Strip */
-        .info-strip { display: flex; justify-content: space-between; margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
-        .info-item small { display: block; font-size: 10px; text-transform: uppercase; color: #777; font-weight: bold; letter-spacing: 0.5px; }
-        .info-item strong { display: block; font-size: 14px; color: #000; }
-
-        /* Section Headers */
-        .sec-head { 
-            background: #f1f5f9; 
-            color: #003366; 
-            padding: 8px 12px; 
-            font-weight: 700; 
-            margin-bottom: 10px; 
-            border-left: 5px solid #003366; /* The Blue Bar */
-            font-size: 14px;
-        }
-
-        /* Tables */
+        .report-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #003366; padding-bottom: 15px; margin-bottom: 20px; }
+        .report-title { color: #003366; font-size: 24px; font-weight: 800; text-transform: uppercase; }
+        
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
         .preview-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 13px; }
-        .preview-table td { padding: 8px 5px; border-bottom: 1px solid #eee; vertical-align: top; }
-        .lbl { font-weight: 600; color: #444; width: 40%; }
-        .val { color: #000; }
-
-        /* CAPA Box (Red Dashed) */
-        .capa-box { 
-            border: 1px dashed #dc3545; 
-            background-color: #fef2f2; /* Very light red */
-            padding: 15px; 
-            border-radius: 4px; 
-            margin-top: 10px;
-            font-size: 13px;
-            color: #333;
-        }
-        .capa-row { margin-bottom: 8px; }
-        .capa-lbl { font-weight: bold; color: #b02a37; margin-right: 5px; }
+        .preview-table td { padding: 6px; border-bottom: 1px solid #eee; vertical-align: top; }
+        .lbl { font-weight: bold; color: #555; width: 40%; }
+        .sec-head { background: #f0f2f5; color: #003366; padding: 8px; font-weight: bold; margin: 15px 0 5px 0; border-left: 4px solid #003366; }
+        
+        .capa-box { border: 1px dashed #dc3545; padding: 15px; background: #fff5f5; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -133,6 +106,9 @@
                                     <div class="col-md-6"><label class="form-label">Root Cause</label><textarea name="Root Cause" class="form-control" rows="2"></textarea></div>
                                     <div class="col-md-6"><label class="form-label">Corrective Action</label><textarea name="Corrective" class="form-control" rows="2"></textarea></div>
                                     <div class="col-md-12"><label class="form-label">Preventive Action</label><textarea name="Preventive" class="form-control" rows="2"></textarea></div>
+                                </div>
+                                <div class="mt-2">
+                                    <label class="form-label">Team Formation</label><input type="text" name="Team" class="form-control form-control-sm">
                                 </div>
                             </div>
                         </div>
@@ -210,20 +186,21 @@
 <div class="modal fade" id="previewModal" tabindex="-1">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
-            <div class="modal-body" style="background:#525659; padding:30px;">
+            <div class="modal-body" style="background:#525659; padding:20px;">
                 <div id="previewContent" class="report-paper mx-auto">
                     <!-- Dynamic Content Loads Here -->
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button class="btn btn-danger" onclick="downloadPPT()">⬇ Download PPT</button>
+                <button class="btn btn-danger" onclick="downloadPPT()">⬇ Download Smart PPT</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
+    // --- SETUP ---
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz6voWBrmtTiETIB9JkTG_gas3amEHRN6xOIi-Qkxj1E4CFOsvvSLLgw0FShqqiIuVB/exec';
     const LOGO_URL = "https://i.postimg.cc/5y7SN4xc/logo.png";
     
@@ -241,6 +218,8 @@
             ctx.drawImage(img, 0, 0);
             logoBase64 = canvas.toDataURL("image/png");
         };
+        // Load default dash
+        // loadDashboard(); 
     };
 
     function handleEvidence() {
@@ -340,77 +319,81 @@
         }
     }
 
-    // --- EXACT SCREENSHOT PREVIEW ---
+    // --- SMART PREVIEW GENERATOR ---
+    // Helper to only generate HTML if value exists
     function genRow(label, value, isBold=false) {
         if(!value || value === "0") return "";
-        return `<tr><td class="lbl">${label}</td><td class="val" ${isBold ? 'style="font-weight:bold;"' : ''}>${value}</td></tr>`;
+        return `<tr><td class="lbl">${label}</td><td ${isBold ? 'class="fw-bold text-dark"' : ''}>${value}</td></tr>`;
     }
 
     function showFullPreview() {
         const fd = new FormData(document.getElementById('pdiForm'));
         const d = (k) => fd.get(k);
 
-        // Build Data
+        // Build Sections Dynamically
         let prodRows = "";
         prodRows += genRow("Lot Qty", d('Lot Qty'));
         prodRows += genRow("Sample Qty", d('Sample Qty'));
         prodRows += genRow("Total Defects", d('Total Defect'), true);
         prodRows += genRow("SRR %", d('SRR'), true);
-        
+
         let defectRows = "";
         if(Number(d('Func Qty')) > 0) defectRows += genRow("Functional", `${d('Func Details')} (${d('Func Qty')})`);
         if(Number(d('Aes Qty')) > 0) defectRows += genRow("Aesthetic", `${d('Aes Details')} (${d('Aes Qty')})`);
         if(Number(d('Pack Qty')) > 0) defectRows += genRow("Packing", `${d('Pack Details')} (${d('Pack Qty')})`);
+        if(!defectRows) defectRows = "<tr><td colspan='2' class='text-muted'>No Major Defects Found</td></tr>";
 
         let traceRows = "";
         if(d('MC Date')) traceRows += genRow("MC Date", d('MC Date'));
         if(d('Belongs To')) traceRows += genRow("Origin", d('Belongs To'));
+        if(d('LQC Name')) traceRows += genRow("LQC Info", `${d('LQC Date')} (${d('LQC Name')})`);
         if(d('FT Name')) traceRows += genRow("FT Info", `${d('FT Date')} (${d('FT Name')})`);
         if(d('BT Attempt') || d('RF Attempt')) traceRows += genRow("Attempts", `BT: ${d('BT Attempt')} / RF: ${d('RF Attempt')}`);
+        if(!traceRows) traceRows = "<tr><td colspan='2' class='text-muted'>No Traceability Data</td></tr>";
 
         let capaHtml = "";
-        if(d('Problem')) capaHtml += `<div class="capa-row"><span class="capa-lbl">Problem:</span>${d('Problem')}</div>`;
-        if(d('Root Cause')) capaHtml += `<div class="capa-row"><span class="capa-lbl">Root Cause:</span>${d('Root Cause')}</div>`;
-        if(d('Corrective')) capaHtml += `<div class="capa-row"><span class="capa-lbl">Corrective:</span>${d('Corrective')}</div>`;
-        if(d('Preventive')) capaHtml += `<div class="capa-row"><span class="capa-lbl">Preventive:</span>${d('Preventive')}</div>`;
+        if(d('Problem')) capaHtml += `<div><strong>Problem:</strong> ${d('Problem')}</div>`;
+        if(d('Root Cause')) capaHtml += `<div class="mt-2"><strong>Root Cause:</strong> ${d('Root Cause')}</div>`;
+        if(d('Corrective')) capaHtml += `<div class="mt-2"><strong>Corrective:</strong> ${d('Corrective')}</div>`;
+        if(d('Preventive')) capaHtml += `<div class="mt-2"><strong>Preventive:</strong> ${d('Preventive')}</div>`;
+        if(!capaHtml) capaHtml = "<span class='text-muted'>No CAPA Required</span>";
 
         const html = `
             <div class="report-header">
-                <img src="${LOGO_URL}" style="height:50px;">
-                <div class="text-end">
-                    <h2 class="report-title">PDI Inspection Report</h2>
-                    <div class="report-meta">Generated: ${new Date().toLocaleDateString()}</div>
+                <img src="${LOGO_URL}" style="height:60px;">
+                <div style="text-align:right;">
+                    <h3 class="report-title">PDI Inspection Report</h3>
+                    <p style="margin:0; color:#666;">Generated: ${new Date().toLocaleDateString()}</p>
                 </div>
             </div>
 
-            <div class="info-strip">
-                <div class="info-item"><small>MODEL</small><strong>${d('Model')}</strong></div>
-                <div class="info-item"><small>DATE</small><strong>${d('Date')}</strong></div>
-                <div class="info-item"><small>LINE</small><strong>${d('Line No')}</strong></div>
-                <div class="info-item"><small>COLOR</small><strong>${d('Colour') || '-'}</strong></div>
+            <div style="background:#f8f9fa; padding:15px; border-radius:5px; margin-bottom:20px; display:flex; justify-content:space-between; flex-wrap:wrap;">
+                <div><small>MODEL</small><br><strong>${d('Model')}</strong></div>
+                <div><small>DATE</small><br><strong>${d('Date')}</strong></div>
+                <div><small>LINE</small><br><strong>${d('Line No')}</strong></div>
+                <div><small>COLOR</small><br><strong>${d('Colour') || '-'}</strong></div>
             </div>
 
-            <div class="row">
-                <div class="col-6">
-                    <div class="sec-head">Production & Defects</div>
-                    <table class="preview-table">${prodRows}</table>
-                    ${defectRows ? `<div style="border-top:1px dashed #ccc; margin:10px 0;"></div><table class="preview-table">${defectRows}</table>` : ''}
+            <div class="info-grid">
+                <div>
+                     <div class="sec-head">Production & Defects</div>
+                     <table class="preview-table">${prodRows}</table>
+                     <table class="preview-table" style="margin-top:10px; border-top:1px dashed #ccc; padding-top:10px;">${defectRows}</table>
                 </div>
-                <div class="col-6" style="border-left:1px solid #f0f0f0;">
+
+                <div>
                     <div class="sec-head">Traceability</div>
-                    <table class="preview-table">${traceRows || '<tr><td colspan="2" class="text-muted">No Data</td></tr>'}</table>
+                    <table class="preview-table">${traceRows}</table>
                 </div>
             </div>
 
-            <div style="margin-top:20px;">
-                <div class="sec-head">CAPA (Action Plan)</div>
-                <div class="capa-box">
-                    ${capaHtml || '<span class="text-muted">No Action Plan Recorded</span>'}
-                </div>
+            <div class="sec-head">CAPA (Action Plan)</div>
+            <div class="capa-box">
+                ${capaHtml}
             </div>
-
+            
             <div class="text-center mt-3">
-                ${evidenceImg ? `<img src="${evidenceImg}" style="max-height:200px; border:1px solid #ddd; padding:5px;">` : ''}
+                ${evidenceImg ? `<div class="sec-head" style="border:none; text-align:center;">Evidence</div><img src="${evidenceImg}" style="max-height:250px; border:2px solid #ddd; padding:5px; border-radius:4px;">` : ''}
             </div>
         `;
         document.getElementById('previewContent').innerHTML = html;
@@ -434,130 +417,91 @@
         generatePPT(d, null);
     }
 
-    // --- REPLICATE EXACT PREVIEW IN PPT ---
+    // --- SMART SINGLE-PAGE PPT ---
     function generatePPT(data, img) {
         let pres = new PptxGenJS();
         let slide = pres.addSlide();
         
-        // 1. Header (Replicating the White look with Blue Text)
-        if(logoBase64) slide.addImage({ data: logoBase64, x: 0.3, y: 0.2, w: 1.5, h: 0.5 });
-        slide.addText("PDI INSPECTION REPORT", { x: 5.5, y: 0.3, w: 4.2, align:'right', fontSize: 18, bold: true, color: '003366', fontFace:'Arial' });
-        slide.addText(`Generated: ${new Date().toLocaleDateString()}`, { x: 5.5, y: 0.6, w: 4.2, align:'right', fontSize: 9, color: '666666' });
-        slide.addShape(pres.ShapeType.line, { x: 0.3, y: 0.8, w: 9.4, h: 0, line: { color: '003366', width: 3 } });
+        // 1. Header (Blue Bar)
+        slide.addShape(pres.ShapeType.rect, { x: 0, y: 0, w: "100%", h: 0.8, fill: "003366" });
+        slide.addText("PDI QUALITY REPORT", { x: 0.3, y: 0.15, fontSize: 22, color: "FFFFFF", bold: true });
+        if(logoBase64) slide.addImage({ data: logoBase64, x: 8.8, y: 0.1, w: 1.0, h: 0.6 });
 
-        // 2. Info Strip (Light Gray Headers, Bold Values)
-        let yInfo = 1.0;
-        const infoOpts = { fontSize: 8, color: '666666', bold: true };
-        const valOpts = { fontSize: 11, color: '000000', bold: true };
-        
-        // Using Table for Alignment
-        slide.addTable([
-            [
-                {text:"MODEL", options:infoOpts}, {text:"DATE", options:infoOpts}, 
-                {text:"LINE", options:infoOpts}, {text:"COLOR", options:infoOpts}
-            ],
-            [
-                {text:data['Model'], options:valOpts}, {text:data['Date'], options:valOpts}, 
-                {text:data['Line No'], options:valOpts}, {text:data['Colour']||'-', options:valOpts}
-            ]
-        ], {
-            x: 0.3, y: yInfo, w: 9.4, 
-            rowH: [0.2, 0.3], 
-            colW: [2.35, 2.35, 2.35, 2.35],
-            border: { b: { pt: 1, color: "EEEEEE" } }, // Bottom border only
-            fill: { color: "FFFFFF" }
-        });
+        // 2. Info Cards (Top)
+        let yPos = 0.9;
+        const addCard = (lbl, val, x) => {
+            if(!val) return; // Skip if empty
+            slide.addShape(pres.ShapeType.rect, { x: x, y: yPos, w: 2.2, h: 0.55, fill: "F2F2F2", line:{color:"CCCCCC"} });
+            slide.addText(lbl, { x: x, y: yPos+0.05, w: 2.2, align:"center", fontSize:9, color:"666" });
+            slide.addText(val, { x: x, y: yPos+0.25, w: 2.2, align:"center", fontSize:12, bold:true, color:"333" });
+        };
+        addCard("MODEL", data['Model'], 0.3);
+        addCard("DATE", data['Date'], 2.7);
+        addCard("LINE", data['Line No'], 5.1);
+        addCard("TOTAL DEFECTS", data['Total Defect'], 7.5);
 
-        // 3. Two-Column Layout
-        let yCols = 1.8;
-        
-        // --- Left Column: Production & Defects ---
-        // Header
-        slide.addShape(pres.ShapeType.rect, { x:0.3, y:yCols, w:0.05, h:0.3, fill:'003366' }); // Blue bar
-        slide.addText("Production & Defects", { x:0.4, y:yCols, w:4.0, h:0.3, rect:{fill:'F1F5F9'}, fontSize:11, bold:true, color:'003366', valign:'middle' });
+        // 3. Left Section: Production & Traceability (Dynamic)
+        yPos = 1.6;
+        slide.addText("DEFECT & TRACEABILITY DATA", { x: 0.3, y: yPos, fontSize: 11, bold: true, color: "003366" });
         
         let leftRows = [];
         if(data['Lot Qty']) leftRows.push(['Lot Qty', data['Lot Qty']]);
         if(data['Sample Qty']) leftRows.push(['Sample Qty', data['Sample Qty']]);
-        if(data['Total Defect']) leftRows.push(['Total Defects', data['Total Defect']]);
-        if(data['SRR'] || data['SRR %']) leftRows.push(['SRR %', data['SRR'] || data['SRR %']]);
+        if(Number(data['Func Qty'])>0) leftRows.push(['Functional', `${data['Func Details']} (${data['Func Qty']})`]);
+        if(Number(data['Aes Qty'])>0) leftRows.push(['Aesthetic', `${data['Aes Details']} (${data['Aes Qty']})`]);
+        if(Number(data['Pack Qty'])>0) leftRows.push(['Packing', `${data['Pack Details']} (${data['Pack Qty']})`]);
         
-        // Add Divider logic by inserting empty row? No, create separate table if needed.
-        // Let's add defects to same list with indent/style difference
-        if(Number(data['Func Qty'])>0) leftRows.push([{text:'Functional', options:{color:'003366'}}, `${data['Func Details']} (${data['Func Qty']})`]);
-        if(Number(data['Aes Qty'])>0) leftRows.push([{text:'Aesthetic', options:{color:'003366'}}, `${data['Aes Details']} (${data['Aes Qty']})`]);
-        if(Number(data['Pack Qty'])>0) leftRows.push([{text:'Packing', options:{color:'003366'}}, `${data['Pack Details']} (${data['Pack Qty']})`]);
+        // Add separator in array logic (conceptually) or just add Traceability
+        if(data['MC Date']) leftRows.push(['MC Date', data['MC Date']]);
+        if(data['LQC Name']) leftRows.push(['LQC Info', data['LQC Name']]);
+        if(data['FT Name']) leftRows.push(['FT Info', data['FT Name']]);
+        if(data['BT Attempt']) leftRows.push(['Attempts', `BT: ${data['BT Attempt']} / RF: ${data['RF Attempt']}`]);
 
         if(leftRows.length > 0) {
             slide.addTable(leftRows, {
-                x: 0.3, y: yCols + 0.4, w: 4.4,
-                fontSize: 10, rowH: 0.3,
-                border: { b: { pt: 0.5, color: "EEEEEE" } },
-                colW: [1.2, 3.2]
+                x: 0.3, y: yPos+0.3, w: 4.0, 
+                fontSize: 10, border: {color:"CCC"}, rowH: 0.35,
+                colW: [1.2, 2.8]
             });
         }
 
-        // --- Right Column: Traceability ---
-        // Header
-        slide.addShape(pres.ShapeType.rect, { x:5.0, y:yCols, w:0.05, h:0.3, fill:'003366' }); // Blue bar
-        slide.addText("Traceability", { x:5.1, y:yCols, w:4.0, h:0.3, rect:{fill:'F1F5F9'}, fontSize:11, bold:true, color:'003366', valign:'middle' });
-
-        let rightRows = [];
-        if(data['MC Date']) rightRows.push(['MC Date', data['MC Date']]);
-        if(data['Belongs To']) rightRows.push(['Origin', data['Belongs To']]);
-        if(data['FT Name']) rightRows.push(['FT Info', `${data['FT Date'] || ''} (${data['FT Name']})`]);
-        if(data['BT Attempt']) rightRows.push(['Attempts', `BT: ${data['BT Attempt']} / RF: ${data['RF Attempt']}`]);
-
-        if(rightRows.length > 0) {
-            slide.addTable(rightRows, {
-                x: 5.0, y: yCols + 0.4, w: 4.4,
-                fontSize: 10, rowH: 0.3,
-                border: { b: { pt: 0.5, color: "EEEEEE" } },
-                colW: [1.0, 3.4]
-            });
-        }
-
-        // 4. CAPA Section (Dynamic Position)
-        // Calculate approx height used by top section to place CAPA below it
-        let maxRows = Math.max(leftRows.length, rightRows.length);
-        let capaY = yCols + 0.4 + (maxRows * 0.3) + 0.3; // Dynamic Y start
-
-        // Header
-        slide.addShape(pres.ShapeType.rect, { x:0.3, y:capaY, w:0.05, h:0.3, fill:'003366' });
-        slide.addText("CAPA (Action Plan)", { x:0.4, y:capaY, w:9.3, h:0.3, rect:{fill:'F1F5F9'}, fontSize:11, bold:true, color:'003366', valign:'middle' });
-
-        // The Red Dashed Box Content
-        let capaText = [];
-        if(data['Problem']) capaText.push({ text: "Problem: ", options: { bold: true, color:'B02A37', breakLine:false } });
-        if(data['Problem']) capaText.push({ text: data['Problem'] + "\n", options: { breakLine:true } });
+        // 4. Right Section: CAPA (Dynamic)
+        slide.addText("CAPA (ACTION PLAN)", { x: 4.5, y: yPos, fontSize: 11, bold: true, color: "003366" });
         
-        if(data['Root Cause']) capaText.push({ text: "Root Cause: ", options: { bold: true, color:'B02A37', breakLine:false } });
-        if(data['Root Cause']) capaText.push({ text: data['Root Cause'] + "\n", options: { breakLine:true } });
+        let capaRows = [];
+        if(data['Problem']) capaRows.push([{text:'Problem', bold:true}, data['Problem']]);
+        if(data['Root Cause']) capaRows.push([{text:'Root Cause', bold:true}, data['Root Cause']]);
+        if(data['Corrective']) capaRows.push([{text:'Corrective', bold:true}, data['Corrective']]);
+        // ✅ Added Preventive Action Here
+        if(data['Preventive']) capaRows.push([{text:'Preventive', bold:true}, data['Preventive']]);
 
-        if(data['Corrective']) capaText.push({ text: "Corrective: ", options: { bold: true, color:'B02A37', breakLine:false } });
-        if(data['Corrective']) capaText.push({ text: data['Corrective'] + "\n", options: { breakLine:true } });
-
-        if(data['Preventive']) capaText.push({ text: "Preventive: ", options: { bold: true, color:'B02A37', breakLine:false } });
-        if(data['Preventive']) capaText.push({ text: data['Preventive'], options: { breakLine:true } });
-
-        if(capaText.length > 0) {
-            slide.addText(capaText, {
-                x: 0.3, y: capaY + 0.4, w: 9.4,
-                fontSize: 10, color: '333333',
-                rect: { fill: 'FEF2F2' }, // Light red fill
-                line: { color: 'DC3545', width: 1, style: 'dash' }, // Red dashed border
-                inset: 0.1
+        if(capaRows.length > 0) {
+            slide.addTable(capaRows, {
+                x: 4.5, y: yPos+0.3, w: 5.2,
+                fontSize: 10, border: {color:"CCC"}, rowH: 0.35,
+                colW: [1.2, 4.0]
             });
         }
 
-        // 5. Image (If space exists, place bottom right, else separate slide logic or small overlay)
-        if(img) {
-            slide.addImage({ data: img, x: 8.0, y: 0.9, w: 1.5, h: 1.0 }); // Header Right Corner (safest spot)
+        // 5. Image (Bottom Right - Smart Placement)
+        // Calculate where CAPA ends to place image below it
+        let capaHeight = (capaRows.length * 0.4) + 0.5; 
+        let imgY = yPos + 0.3 + capaHeight; // Start image after CAPA table
+
+        if(img && imgY < 5.0) { // Only if there is space on slide
+             slide.addImage({ data: img, x: 5.5, y: imgY, w: 3.0, h: 1.5 });
+             slide.addText("Evidence", { x: 5.5, y: imgY+1.55, fontSize:9, color:"999" });
+        } else if (img) {
+            // If CAPA is too long, place image small in corner
+            slide.addImage({ data: img, x: 8.0, y: 0.9, w: 1.5, h: 1.0 }); 
         }
 
+        slide.addText("Confidential Report", { x:0, y:5.5, w:'100%', align:'center', fontSize:8, color:'DDD' });
+        
         pres.writeFile({ fileName: `PDI_Report_${data['Model']}.pptx` });
     }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
