@@ -120,7 +120,19 @@
                             <div class="card-header text-success"><i class="bi bi-qr-code me-2"></i>Traceability</div>
                             <div class="card-body">
                                 <div class="mb-2"><label class="form-label">Master Carton Date</label><input type="datetime-local" name="MC Date" class="form-control"></div>
-                                <div class="mb-2"><label class="form-label">Defect Origin</label><select name="Belongs To" class="form-select"><option value="">Select</option><option>Buds</option>option>Dashcam</option><option>Case</option></select></div>
+                                
+                                <!-- Updated Defect Origin List -->
+                                <div class="mb-2">
+                                    <label class="form-label">Defect Origin</label>
+                                    <select name="Belongs To" class="form-select">
+                                        <option value="">Select</option>
+                                        <option>Buds</option>
+                                        <option>Charging Case</option>
+                                        <option>Dashcam</option>
+                                        <option>Power Bank</option>
+                                        <option>Smart Watch</option>
+                                    </select>
+                                </div>
                                 
                                 <div class="row g-2 mb-2">
                                     <div class="col-6"><label class="form-label">BT Attempt</label><select name="BT Attempt" class="form-select"><option value="">Select</option><option>Yes</option><option>No</option></select></div>
@@ -132,11 +144,27 @@
                                     <input type="datetime-local" name="LQC Date" class="form-control form-control-sm mb-1">
                                     <input type="text" name="LQC Name" class="form-control form-control-sm" placeholder="Operator Name">
                                 </div>
-                                <div class="bg-light p-2 border rounded">
+                                <div class="bg-light p-2 border rounded mb-2">
                                     <small class="fw-bold text-primary">FT Check</small>
                                     <input type="datetime-local" name="FT Date" class="form-control form-control-sm mb-1">
                                     <input type="text" name="FT Name" class="form-control form-control-sm" placeholder="Operator Name">
                                 </div>
+
+                                <!-- NEW TESTING STAGE & OPERATOR SECTION -->
+                                <div class="bg-light p-2 border rounded">
+                                    <small class="fw-bold text-primary">Specific Test Stage</small>
+                                    <input type="text" name="Testing Stage" class="form-control form-control-sm mb-1" placeholder="Testing Stage Name">
+                                    <div class="row g-1">
+                                        <div class="col-6">
+                                            <input type="date" name="Test Date" class="form-control form-control-sm">
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="text" name="Operator Name" class="form-control form-control-sm" placeholder="Operator Name">
+                                        </div>
+                                    </div>
+                                    <input type="text" name="Extra Column" class="form-control form-control-sm mt-1" placeholder="Additional / More Info">
+                                </div>
+
                             </div>
                         </div>
 
@@ -218,8 +246,7 @@
             ctx.drawImage(img, 0, 0);
             logoBase64 = canvas.toDataURL("image/png");
         };
-        // Load default dash
-        // loadDashboard(); 
+        // loadDashboard(); // Un-comment if you want auto-load
     };
 
     function handleEvidence() {
@@ -256,7 +283,7 @@
         fetch(SCRIPT_URL, {method:'POST', body:new FormData(e.target)})
         .then(res=>res.json())
         .then(d=>{ alert(d.message); resetForm(); btn.innerText='Save Record'; btn.disabled=false; })
-        .catch(()=>{ alert("Error"); btn.disabled=false; });
+        .catch(()=>{ alert("Error. Ensure you added new columns to your Sheet."); btn.disabled=false; });
     });
 
     function resetForm() {
@@ -298,6 +325,8 @@
         const f = document.getElementById('pdiForm').elements;
         document.getElementById('formAction').value = 'edit';
         document.getElementById('editRowId').value = r[0];
+        
+        // Basic mapping
         f['Date'].value=r[1]; f['Model'].value=r[2]; f['Line No'].value=r[3];
         f['Colour'].value=r[4]; f['Lot Qty'].value=r[5]; f['Sample Qty'].value=r[6];
         f['Total Defect'].value=r[7]; f['SRR'].value=r[8];
@@ -309,6 +338,13 @@
         f['Belongs To'].value=r[20]; f['BT Attempt'].value=r[21]; f['RF Attempt'].value=r[22];
         f['Team'].value=r[23]; f['Problem'].value=r[24]; f['Root Cause'].value=r[25];
         f['Corrective'].value=r[26]; f['Preventive'].value=r[27];
+
+        // MAPPING NEW FIELDS (Assuming you add them to the end of Google Sheet: Col 29, 30, 31, 32)
+        // If the Sheet columns don't exist yet, these will be undefined, which is fine.
+        if(r[28]) f['Testing Stage'].value = r[28];
+        if(r[29]) f['Test Date'].value = r[29];
+        if(r[30]) f['Operator Name'].value = r[30];
+        if(r[31]) f['Extra Column'].value = r[31];
     }
 
     async function delRec(id) {
@@ -320,7 +356,6 @@
     }
 
     // --- SMART PREVIEW GENERATOR ---
-    // Helper to only generate HTML if value exists
     function genRow(label, value, isBold=false) {
         if(!value || value === "0") return "";
         return `<tr><td class="lbl">${label}</td><td ${isBold ? 'class="fw-bold text-dark"' : ''}>${value}</td></tr>`;
@@ -330,7 +365,6 @@
         const fd = new FormData(document.getElementById('pdiForm'));
         const d = (k) => fd.get(k);
 
-        // Build Sections Dynamically
         let prodRows = "";
         prodRows += genRow("Lot Qty", d('Lot Qty'));
         prodRows += genRow("Sample Qty", d('Sample Qty'));
@@ -348,6 +382,12 @@
         if(d('Belongs To')) traceRows += genRow("Origin", d('Belongs To'));
         if(d('LQC Name')) traceRows += genRow("LQC Info", `${d('LQC Date')} (${d('LQC Name')})`);
         if(d('FT Name')) traceRows += genRow("FT Info", `${d('FT Date')} (${d('FT Name')})`);
+        
+        // NEW PREVIEW DATA
+        if(d('Testing Stage')) traceRows += genRow("Test Stage", d('Testing Stage'));
+        if(d('Test Date') || d('Operator Name')) traceRows += genRow("Test Info", `${d('Test Date')} / ${d('Operator Name')}`);
+        if(d('Extra Column')) traceRows += genRow("Extra Info", d('Extra Column'));
+
         if(d('BT Attempt') || d('RF Attempt')) traceRows += genRow("Attempts", `BT: ${d('BT Attempt')} / RF: ${d('RF Attempt')}`);
         if(!traceRows) traceRows = "<tr><td colspan='2' class='text-muted'>No Traceability Data</td></tr>";
 
@@ -412,7 +452,9 @@
             'Date':r[1], 'Model':r[2], 'Line No':r[3], 'Colour':r[4], 'Lot Qty':r[5], 'Sample Qty':r[6],
             'Total Defect':r[7], 'SRR':r[8], 'Func Details':r[9], 'Func Qty':r[10], 'Aes Details':r[11], 'Aes Qty':r[12], 'Pack Details':r[13], 'Pack Qty':r[14],
             'MC Date':r[15], 'LQC Date':r[16], 'LQC Name':r[17], 'FT Date':r[18], 'FT Name':r[19], 'Belongs To':r[20], 'BT Attempt':r[21], 'RF Attempt':r[22],
-            'Problem':r[24], 'Root Cause':r[25], 'Corrective':r[26], 'Preventive':r[27]
+            'Team':r[23], 'Problem':r[24], 'Root Cause':r[25], 'Corrective':r[26], 'Preventive':r[27],
+            // NEW PPT DATA
+            'Testing Stage':r[28], 'Test Date':r[29], 'Operator Name':r[30], 'Extra Column':r[31]
         };
         generatePPT(d, null);
     }
@@ -422,15 +464,13 @@
         let pres = new PptxGenJS();
         let slide = pres.addSlide();
         
-        // 1. Header (Blue Bar)
         slide.addShape(pres.ShapeType.rect, { x: 0, y: 0, w: "100%", h: 0.8, fill: "003366" });
         slide.addText("PDI QUALITY REPORT", { x: 0.3, y: 0.15, fontSize: 22, color: "FFFFFF", bold: true });
         if(logoBase64) slide.addImage({ data: logoBase64, x: 8.8, y: 0.1, w: 1.0, h: 0.6 });
 
-        // 2. Info Cards (Top)
         let yPos = 0.9;
         const addCard = (lbl, val, x) => {
-            if(!val) return; // Skip if empty
+            if(!val) return; 
             slide.addShape(pres.ShapeType.rect, { x: x, y: yPos, w: 2.2, h: 0.55, fill: "F2F2F2", line:{color:"CCCCCC"} });
             slide.addText(lbl, { x: x, y: yPos+0.05, w: 2.2, align:"center", fontSize:9, color:"666" });
             slide.addText(val, { x: x, y: yPos+0.25, w: 2.2, align:"center", fontSize:12, bold:true, color:"333" });
@@ -440,7 +480,6 @@
         addCard("LINE", data['Line No'], 5.1);
         addCard("TOTAL DEFECTS", data['Total Defect'], 7.5);
 
-        // 3. Left Section: Production & Traceability (Dynamic)
         yPos = 1.6;
         slide.addText("DEFECT & TRACEABILITY DATA", { x: 0.3, y: yPos, fontSize: 11, bold: true, color: "003366" });
         
@@ -451,8 +490,14 @@
         if(Number(data['Aes Qty'])>0) leftRows.push(['Aesthetic', `${data['Aes Details']} (${data['Aes Qty']})`]);
         if(Number(data['Pack Qty'])>0) leftRows.push(['Packing', `${data['Pack Details']} (${data['Pack Qty']})`]);
         
-        // Add separator in array logic (conceptually) or just add Traceability
         if(data['MC Date']) leftRows.push(['MC Date', data['MC Date']]);
+        if(data['Belongs To']) leftRows.push(['Origin', data['Belongs To']]); // Added Origin to PPT
+        
+        // ADD NEW FIELDS TO PPT
+        if(data['Testing Stage']) leftRows.push(['Stage', data['Testing Stage']]);
+        if(data['Operator Name']) leftRows.push(['Operator', data['Operator Name']]);
+        if(data['Extra Column']) leftRows.push(['Remarks', data['Extra Column']]);
+
         if(data['LQC Name']) leftRows.push(['LQC Info', data['LQC Name']]);
         if(data['FT Name']) leftRows.push(['FT Info', data['FT Name']]);
         if(data['BT Attempt']) leftRows.push(['Attempts', `BT: ${data['BT Attempt']} / RF: ${data['RF Attempt']}`]);
@@ -465,14 +510,12 @@
             });
         }
 
-        // 4. Right Section: CAPA (Dynamic)
         slide.addText("CAPA (ACTION PLAN)", { x: 4.5, y: yPos, fontSize: 11, bold: true, color: "003366" });
         
         let capaRows = [];
         if(data['Problem']) capaRows.push([{text:'Problem', bold:true}, data['Problem']]);
         if(data['Root Cause']) capaRows.push([{text:'Root Cause', bold:true}, data['Root Cause']]);
         if(data['Corrective']) capaRows.push([{text:'Corrective', bold:true}, data['Corrective']]);
-        // ✅ Added Preventive Action Here
         if(data['Preventive']) capaRows.push([{text:'Preventive', bold:true}, data['Preventive']]);
 
         if(capaRows.length > 0) {
@@ -483,16 +526,13 @@
             });
         }
 
-        // 5. Image (Bottom Right - Smart Placement)
-        // Calculate where CAPA ends to place image below it
         let capaHeight = (capaRows.length * 0.4) + 0.5; 
-        let imgY = yPos + 0.3 + capaHeight; // Start image after CAPA table
+        let imgY = yPos + 0.3 + capaHeight; 
 
-        if(img && imgY < 5.0) { // Only if there is space on slide
+        if(img && imgY < 5.0) { 
              slide.addImage({ data: img, x: 5.5, y: imgY, w: 3.0, h: 1.5 });
              slide.addText("Evidence", { x: 5.5, y: imgY+1.55, fontSize:9, color:"999" });
         } else if (img) {
-            // If CAPA is too long, place image small in corner
             slide.addImage({ data: img, x: 8.0, y: 0.9, w: 1.5, h: 1.0 }); 
         }
 
@@ -504,7 +544,3 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-
-
-
